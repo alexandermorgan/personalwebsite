@@ -1,0 +1,467 @@
+/* Site layout and page styles. */
+
+.container {
+  width: 100%;
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-4);
+  z-index: 10;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: var(--text-sm);
+  translate: 0 -200%;
+}
+.skip-link:focus {
+  translate: 0 0;
+}
+
+/* Header */
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  view-transition-name: site-header;
+}
+.header-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-6);
+  min-height: var(--header-height);
+  padding-block: var(--space-2);
+}
+.brand {
+  color: var(--brand);
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.site-nav {
+  flex: 1;
+}
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+}
+.nav-links a {
+  color: var(--muted-foreground);
+  text-decoration: none;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.45em;
+}
+.nav-links a:hover,
+.nav-links a[aria-current] {
+  color: var(--foreground);
+}
+.nav-links a[aria-current="page"] {
+  text-decoration-line: underline;
+  text-decoration-color: var(--brand);
+}
+/* On narrow screens the brand and theme switch share the first line and the
+   links get their own. */
+@media (max-width: 48rem) {
+  .site-nav {
+    order: 1;
+    flex-basis: 100%;
+  }
+  .theme-toggle {
+    margin-inline-start: auto;
+  }
+}
+
+/* Theme switch (the same switch as hypermediajobs.com). */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+/* Switching themes sweeps the new theme across the page from the switch (see
+   site.setTheme), rather than fading every color: text and background fading in
+   opposite directions pass through the same gray, and the text vanishes. The
+   header joins the page snapshot so it's swept with everything else. */
+:root.theme-changing::view-transition-old(root),
+:root.theme-changing::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+.theme-changing .site-header {
+  view-transition-name: none;
+}
+/* The thumb shows a moon in dark mode and a sun in light mode, and spins once
+   while the theme changes. Its look follows <html data-theme> rather than
+   :checked, so a saved light theme shows correctly from the first paint. */
+.theme-toggle .switch[role="switch"] {
+  width: 40px;
+  height: 22px;
+  padding-inline: 1px;
+  background-color: var(--primary);
+}
+.theme-toggle .switch[role="switch"]::before {
+  content: "\1F319";
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-size: 12px;
+  line-height: 1;
+  background-color: var(--theme-thumb);
+  box-shadow: var(--shadow-xs);
+  translate: 18px 0;
+  transition: translate var(--theme-transition), background-color var(--theme-transition);
+}
+:root[data-theme="light"] .theme-toggle .switch[role="switch"] {
+  background-color: var(--switch-track);
+}
+:root[data-theme="light"] .theme-toggle .switch[role="switch"]::before {
+  content: "\2600\FE0F";
+  translate: 0 0;
+  background-color: var(--theme-thumb);
+}
+.theme-changing .theme-toggle .switch[role="switch"]::before {
+  animation: theme-spin var(--theme-transition);
+}
+@keyframes theme-spin {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* Main and footer */
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-block: var(--space-8) var(--space-12);
+}
+/* <main> gets focus after in-page navigation (so screen readers announce the
+   new page) but isn't a control, so it never shows a focus ring. */
+main:focus,
+main:focus-visible {
+  outline: none;
+}
+
+.site-footer {
+  padding-block: var(--space-6);
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+}
+.site-footer a {
+  color: inherit;
+}
+.site-footer a:hover {
+  color: var(--foreground);
+}
+
+/* Text */
+
+.narrow {
+  width: 100%;
+  max-width: var(--narrow-width);
+}
+.narrow.centered {
+  margin-inline: auto;
+}
+.muted {
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+}
+.lede {
+  max-width: var(--narrow-width);
+  color: var(--muted-foreground);
+  font-size: var(--text-lg);
+  text-wrap: pretty;
+}
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  line-height: var(--leading-relaxed);
+  text-wrap: pretty;
+}
+.prose h2 {
+  margin-top: var(--space-4);
+}
+.prose :is(ul, ol) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-inline-start: var(--space-6);
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+.prose > .lede {
+  color: var(--foreground);
+}
+
+/* Cards (projects, publications, recommendations)
+ *
+ * Every card is --tile-height tall: the face (art, title, tagline) links to the
+ * project, and the tab row along the bottom has a Link tab (the same link) and a
+ * Description tab, the <summary> of a <details>. Opening it makes the card
+ * exactly twice as tall, and the description fills the new half, scrolling if
+ * it's longer. Fixed heights and fixed-size images mean nothing shifts as the
+ * page loads.
+ */
+.tiles {
+  --tile-height: 20rem;
+  --tile-min-width: 15rem;
+  --tile-tab-height: 2.5rem;
+  --tile-border: 1px;
+  --tile-title-lines: 2;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--tile-min-width), 100%), 1fr));
+  align-items: start;
+  gap: var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+/* Publications have long titles: wider, taller cards with room for them. */
+.tiles.tiles-wide {
+  --tile-height: 22rem;
+  --tile-min-width: 18rem;
+  --tile-title-lines: 4;
+}
+.card.tile {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: calc(var(--tile-height) - var(--tile-tab-height) - 2 * var(--tile-border)) var(--tile-tab-height);
+  gap: 0;
+  height: var(--tile-height);
+  padding: 0;
+  border-width: var(--tile-border);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.card.tile:has(> .tile-details[open]) {
+  height: calc(2 * var(--tile-height));
+}
+.card.tile:hover {
+  border-color: color-mix(in oklab, var(--tone) 60%, var(--border));
+  box-shadow: 0 4px 16px -6px color-mix(in oklab, var(--tone) 45%, transparent);
+}
+
+.tile-face {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.tile-face:focus-visible {
+  outline-offset: -3px;
+}
+.tile-art {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+  object-position: top;
+  background-color: var(--tone);
+}
+.tile-cover {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background-image: linear-gradient(135deg, var(--tone), color-mix(in oklab, var(--tone) 70%, black));
+  color: oklch(1 0 0);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+}
+.tile-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+.tile-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--tile-title-lines);
+  font-size: var(--text-base);
+}
+.tile-tagline {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--muted-foreground);
+}
+
+.tile-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--tile-tab-height);
+  border-top: 1px solid var(--border);
+  background-color: color-mix(in oklab, var(--muted) 45%, var(--card));
+  color: var(--muted-foreground);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition), background-color var(--transition);
+}
+.tile-tab:hover,
+.tile-details[open] > .tile-tab {
+  background-color: var(--card);
+  color: var(--foreground);
+}
+.tile-link {
+  grid-area: 2 / 1;
+  border-inline-end: 1px solid var(--border);
+}
+.tile-details {
+  grid-area: 2 / 2;
+}
+.tile-details > summary {
+  list-style: none;
+}
+.tile-details > summary::-webkit-details-marker {
+  display: none;
+}
+.tile-details > summary:focus-visible {
+  outline-offset: -3px;
+}
+.tile-details > summary::after {
+  content: "";
+  width: 0.4em;
+  height: 0.4em;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  rotate: 45deg;
+  translate: 0 -0.15em;
+  transition: rotate var(--transition), translate var(--transition);
+}
+.tile-details[open] > summary::after {
+  rotate: 225deg;
+  translate: 0 0.15em;
+}
+/* The description fills the card's second half, the space below the tabs. */
+.tile-panel {
+  position: absolute;
+  inset: calc(var(--tile-height) - 2 * var(--tile-border)) 0 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-4);
+  border-top: 1px solid var(--border);
+  line-height: var(--leading-relaxed);
+}
+.tile-panel:focus-visible {
+  outline-offset: -3px;
+}
+
+.tone-red {
+  --tone: oklch(0.6 0.17 25);
+}
+.tone-orange {
+  --tone: oklch(0.66 0.16 50);
+}
+.tone-amber {
+  --tone: oklch(0.7 0.14 80);
+}
+.tone-green {
+  --tone: oklch(0.6 0.13 150);
+}
+.tone-teal {
+  --tone: oklch(0.6 0.1 195);
+}
+.tone-blue {
+  --tone: oklch(0.58 0.15 250);
+}
+.tone-indigo {
+  --tone: oklch(0.52 0.16 275);
+}
+.tone-violet {
+  --tone: oklch(0.56 0.16 305);
+}
+.tone-pink {
+  --tone: oklch(0.63 0.17 350);
+}
+.tone-slate {
+  --tone: oklch(0.5 0.03 260);
+}
+
+/* Blog */
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: var(--narrow-width);
+  padding: 0;
+  list-style: none;
+}
+.post-item h2 a {
+  color: var(--foreground);
+  text-decoration: none;
+}
+.post-item h2 a:hover {
+  text-decoration: underline;
+}
+.post {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.post-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.post-header a {
+  color: inherit;
+}
+
+/* CV */
+
+.cv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+/* A fixed height, so the embedded PDF can't shift anything as it loads. Phones
+   don't display embedded PDFs well, so they get only the buttons. */
+.cv-frame {
+  width: 100%;
+  height: 80vh;
+  min-height: 30rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background-color: var(--card);
+}
+@media (max-width: 48rem) {
+  .cv-frame {
+    display: none;
+  }
+}

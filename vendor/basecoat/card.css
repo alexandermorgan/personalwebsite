@@ -1,0 +1,36 @@
+/* Basecoat: card (MIT, Ronan Berder). Ported from Tailwind to plain CSS. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-block: var(--space-6);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background-color: var(--card);
+  color: var(--card-foreground);
+  font-size: var(--text-sm);
+}
+.card > header {
+  display: grid;
+  grid-auto-rows: min-content;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding-inline: var(--space-6);
+}
+.card > header > :is(h2, h3) {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-normal);
+}
+.card > header > p {
+  color: var(--muted-foreground);
+}
+.card > section {
+  padding-inline: var(--space-6);
+}
+.card > footer {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--space-6);
+}

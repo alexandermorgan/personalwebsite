@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "alexandermorgan",
+  // Built by scripts/build.ts, which wrangler runs itself before dev and deploy
+  // (and again on changes in watch_dir); the result is uploaded as-is.
+  "main": "dist/worker.js",
+  "build": {
+    "command": "bun scripts/build.ts",
+    "watch_dir": ["src", "pages", "posts", "client", "styles", "vendor", "public"]
+  },
+  "no_bundle": true,
+  "find_additional_modules": false,
+  "compatibility_date": "2026-09-20",
+  // Served only on the custom domain; www redirects to it (see worker.ts).
+  // The domain must be on this Cloudflare account before the first deploy.
+  "routes": [
+    { "pattern": "alexandermorgan.dev", "custom_domain": true },
+    { "pattern": "www.alexandermorgan.dev", "custom_domain": true }
+  ],
+  "workers_dev": false,
+  "observability": { "enabled": true },
+  "assets": { "directory": "dist/public", "binding": "ASSETS" },
+  "vars": {
+    // The CV PDF's URL (e.g. a public R2 URL); the worker serves it at /cv.pdf.
+    // Empty: /cv says the CV is coming soon.
+    "CV_URL": ""
+  }
+}

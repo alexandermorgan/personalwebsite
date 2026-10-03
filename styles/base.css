@@ -1,0 +1,104 @@
+/* Reset and element defaults. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  border: 0 solid var(--border);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Reserve the scrollbar so pages of different heights don't shift sideways. */
+  scrollbar-gutter: stable;
+}
+
+/* Cross-document view transitions: page-to-page navigation cross-fades in place. */
+@view-transition {
+  navigation: auto;
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin "antialiased" smoothing suits light text on dark; dark text on a light
+   page reads fuller with the platform default. */
+:root[data-theme="light"] body {
+  -webkit-font-smoothing: auto;
+}
+
+h1,
+h2,
+h3 {
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-semibold);
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--text-2xl);
+}
+h2 {
+  font-size: var(--text-xl);
+}
+h3 {
+  font-size: var(--text-base);
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 0.2em;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -1,0 +1,16 @@
+<li class="card tile tone-{{tone}}">
+  <a class="tile-face" href="{{url}}" target="_blank" rel="noopener">
+    {{art}}
+    <div class="tile-text">
+      <h2 class="tile-title">{{title}}</h2>
+      <p class="tile-tagline">{{tagline}}</p>
+    </div>
+  </a>
+  <a class="tile-tab tile-link" href="{{url}}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Link</a>
+  <details class="tile-details">
+    <summary class="tile-tab">Description</summary>
+    <div class="tile-panel" tabindex="0" role="region" aria-label="About {{title}}">
+      <p>{{description}}</p>
+    </div>
+  </details>
+</li>
