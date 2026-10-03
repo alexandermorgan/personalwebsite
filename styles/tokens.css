@@ -48,10 +48,6 @@
   --control-height: 2.25rem;
   --control-height-sm: 2rem;
 
-  /* Brand colors (from hypermediajobs.com), the same in both themes. */
-  --brand: #dd4b25;
-  --brand-accent: #f1ac4b;
-
   /* Motion */
   --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --theme-transition: 500ms ease-in-out;
@@ -86,6 +82,9 @@
   --switch-thumb: var(--foreground);
   --switch-thumb-checked: var(--primary-foreground);
   --theme-thumb: oklch(0.3 0.03 265);
+  /* Accents: green (the wordmark) and brown (the current page in the navbar). */
+  --brand: oklch(0.74 0.14 145);
+  --brand-accent: oklch(0.66 0.08 60);
 }
 
 /* Light: sand. Fields are raised white panels with a soft shadow; in dark mode they're solid, lighter boxes. */
@@ -112,4 +111,6 @@
   --switch-thumb: var(--background);
   --switch-thumb-checked: var(--background);
   --theme-thumb: oklch(1 0 0);
+  --brand: oklch(0.47 0.12 145);
+  --brand-accent: oklch(0.5 0.08 55);
 }

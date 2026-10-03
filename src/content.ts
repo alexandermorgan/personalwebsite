@@ -6,8 +6,16 @@
 export const TONES = ["red", "orange", "amber", "green", "teal", "blue", "indigo", "violet", "pink", "slate"] as const;
 export type Tone = (typeof TONES)[number];
 
-/** A screenshot in public/images (always 640×400, so it can't shift the layout), or a lettered cover. */
-export type TileArt = { image: string } | { cover: string };
+/**
+ * A card's picture: a lettered cover in the card's color, optionally with an
+ * image over it (the site's og:image, linked from the site itself). The image is
+ * cropped to the cover's fixed size, so it can't shift the layout, and if it
+ * fails to load the cover shows instead.
+ */
+export interface TileArt {
+  cover: string;
+  image?: string;
+}
 
 export interface Tile {
   title: string;
@@ -18,10 +26,9 @@ export interface Tile {
   description: string;
   tone: Tone;
   art: TileArt;
+  /** When it was added (YYYY-MM-DD), for the RSS feed. Optional: undated items are still in the feed. */
+  added?: string;
 }
-
-export const IMAGE_WIDTH = 640;
-export const IMAGE_HEIGHT = 400;
 
 export const projects: Tile[] = [
   {
@@ -31,7 +38,7 @@ export const projects: Tile[] = [
     description:
       "A free job board for roles building hypermedia-driven web apps with htmx, Datastar, Hotwire, Unpoly and plain server-rendered HTML. Searching job boards for hypermedia keywords turns up almost nothing, so this collects those roles in one place. Every posting is vetted before it goes live, and listings found elsewhere link back to the original. It runs as a single Cloudflare Worker with server-rendered HTML and Datastar.",
     tone: "orange",
-    art: { image: "/images/projects/hypermedia-jobs.webp" },
+    art: { cover: "</>", image: "https://hypermediajobs.com/og-image.png" },
   },
   {
     title: "Sound Diagnosis",
@@ -48,7 +55,7 @@ export const projects: Tile[] = [
     description:
       "An open-source, pure Python implementation of Byte Pair Encoding tokenizer training that safely batches hundreds of token-pair merges at a time and shrinks the memory footprint of the training text. That makes it practical to train a good tokenizer on an ordinary laptop and to experiment with new tokenization strategies, such as stop-word preprocessing or ignoring the rarest text chunks. See the paper on the Publications page.",
     tone: "indigo",
-    art: { cover: "BPE" },
+    art: { cover: "BPE", image: "https://opengraph.githubassets.com/1/alexandermorgan/BatchBPE" },
   },
   {
     title: "Humlib",
@@ -57,7 +64,7 @@ export const projects: Tile[] = [
     description:
       "Craig Sapp's C++ library for parsing, analyzing and transforming music encoded in the Humdrum format, which powers many of the Humdrum tools and the Verovio Humdrum Viewer. I created its Renaissance dissonance classifier with Craig, which labels the type of every dissonance in a score and is available on the Josquin Research Project website.",
     tone: "green",
-    art: { cover: "**kern" },
+    art: { cover: "**kern", image: "https://opengraph.githubassets.com/1/craigsapp/humlib" },
   },
   {
     title: "Palomitas",
@@ -66,7 +73,7 @@ export const projects: Tile[] = [
     description:
       "A 3D browser game in which you play a hungry pigeon: walk, flap and peck your way around town scavenging food, take on challenges for extra points, and keep your hunger and stamina up for as long as you can. Runs end on a leaderboard.",
     tone: "slate",
-    art: { image: "/images/projects/palomitas.webp" },
+    art: { cover: "Palomitas" },
   },
   {
     title: "DarkHN",
@@ -75,7 +82,7 @@ export const projects: Tile[] = [
     description:
       "A dark-themed, read-only version of Hacker News for reading late at night without being blinded. Same stories, same comments, easier on the eyes.",
     tone: "amber",
-    art: { image: "/images/projects/darkhn.webp" },
+    art: { cover: "Dark HN" },
   },
   {
     title: "Eightile",
@@ -84,7 +91,7 @@ export const projects: Tile[] = [
     description:
       "A daily word game in which you unscramble progressively longer words, working your way up to the eight-letter word. Find it in time to win.",
     tone: "violet",
-    art: { image: "/images/projects/eightile.webp" },
+    art: { cover: "Eightile", image: "https://eightile.com/Eightile_Word_Game.png" },
   },
   {
     title: "Photo Chute",
@@ -93,7 +100,7 @@ export const projects: Tile[] = [
     description:
       "A sliding-tile puzzle made from a photo: pick a picture or add your own, choose a grid size, shuffle, and slide the pieces back into place.",
     tone: "pink",
-    art: { image: "/images/projects/photo-chute.webp" },
+    art: { cover: "Photo Chute" },
   },
   {
     title: "EcoRate",
@@ -102,7 +109,7 @@ export const projects: Tile[] = [
     description:
       "A map of nearby refill stores and sustainable cafes. EcoRate helps you find cafes that welcome your own cup, refill stores that sell the zero-waste item you're after, and more, and lets you review places on how eco-friendly they are.",
     tone: "green",
-    art: { image: "/images/projects/ecorate.webp" },
+    art: { cover: "EcoRate", image: "https://pub-1918d74a21b442a78ea49895aadaf9ff.r2.dev/NYC_snapshot_2022_04_23-2-1024x584.png" },
   },
 ];
 
@@ -127,7 +134,7 @@ export const publications: Tile[] = [
   },
   {
     title: "Musicologists and Data Scientists Pull out all the Stops: Defining Renaissance Cadences Systematically",
-    url: "https://doi.org/10.17613/sn48-8932",
+    url: "https://crim-essays.crimproject.org/crim-essays-and-explorations/morgan-russobatterham-freedman-defining-cadences/",
     tagline: "With Daniel Russo-Batterham and Richard Freedman. Music Encoding Conference Proceedings 2022, pp. 89–98.",
     description:
       "How a team of musicologists and data scientists developed CRIM Intervals, a Python and Pandas toolkit for Citations: The Renaissance Imitation Mass: modeling human expertise in terms computers can use to analyze encoded scores, and presenting the results in forms scholars can interrogate and refine. Taking the cadence as a case study, it covers everything from defining the constraints of a musical event to refining the tools to eliminate false negatives and positives.",
@@ -171,7 +178,7 @@ export const recommendations: Tile[] = [
     description:
       "An instant, free, collaborative whiteboard that works on any device with no sign-up. It's a joy to sketch with, and the team also makes the infinite-canvas SDK it's built on.",
     tone: "blue",
-    art: { image: "/images/recommendations/tldraw.webp" },
+    art: { cover: "tldraw", image: "https://www.tldraw.com/social-og.png" },
   },
   {
     title: "neal.fun",
@@ -180,7 +187,7 @@ export const recommendations: Tile[] = [
     description:
       "Neal Agarwal's collection of delightful web toys, games and visualizations, from the deep sea to the size of space. The cards on this site are a nod to its home page.",
     tone: "pink",
-    art: { image: "/images/recommendations/neal-fun.webp" },
+    art: { cover: "neal.fun" },
   },
   {
     title: "htmx essays",
@@ -189,6 +196,6 @@ export const recommendations: Tile[] = [
     description:
       "The htmx project's essays on hypermedia, REST, HATEOAS and web application architecture, including the ones that explain why returning HTML from the server is still a great way to build for the web.",
     tone: "slate",
-    art: { image: "/images/recommendations/htmx-essays.webp" },
+    art: { cover: "</> htmx" },
   },
 ];

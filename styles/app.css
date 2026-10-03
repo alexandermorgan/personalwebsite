@@ -68,7 +68,7 @@
 }
 .nav-links a[aria-current="page"] {
   text-decoration-line: underline;
-  text-decoration-color: var(--brand);
+  text-decoration-color: var(--brand-accent);
 }
 /* On narrow screens the brand and theme switch share the first line and the
    links get their own. */
@@ -164,6 +164,19 @@ main:focus-visible {
   color: var(--muted-foreground);
   font-size: var(--text-sm);
 }
+.footer-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  padding: 0;
+  list-style: none;
+}
 .site-footer a {
   color: inherit;
 }
@@ -225,7 +238,7 @@ main:focus-visible {
  * project, and the tab row along the bottom has a Link tab (the same link) and a
  * Description tab, the <summary> of a <details>. Opening it makes the card
  * exactly twice as tall, and the description fills the new half, scrolling if
- * it's longer. Fixed heights and fixed-size images mean nothing shifts as the
+ * it's longer. Fixed heights (images are cropped to fit) mean nothing shifts as the
  * page loads.
  */
 .tiles {
@@ -277,24 +290,29 @@ main:focus-visible {
 .tile-face:focus-visible {
   outline-offset: -3px;
 }
+/* The lettered cover, with the site's image (if any) over it. */
 .tile-art {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  object-fit: cover;
-  object-position: top;
-  background-color: var(--tone);
-}
-.tile-cover {
+  position: relative;
   display: grid;
   place-items: center;
+  min-height: 0;
   overflow: hidden;
+  padding-inline: var(--space-4);
   background-image: linear-gradient(135deg, var(--tone), color-mix(in oklab, var(--tone) 70%, black));
   color: oklch(1 0 0);
   font-family: var(--font-mono);
   font-size: var(--text-2xl);
   font-weight: var(--weight-semibold);
   letter-spacing: 0.02em;
+  text-align: center;
+}
+/* og:images come in all shapes (usually 1.91:1), so they're shown whole, over the card's color. */
+.tile-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .tile-text {
   display: flex;

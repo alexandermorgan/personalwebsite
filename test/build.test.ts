@@ -32,11 +32,11 @@ describe("build", () => {
     expect(hashedName("app.css", "a")).toBe(hashedName("app.css", "a"));
   });
 
-  test("copies public files, including cache headers for hashed assets and images", async () => {
+  test("copies public files, including cache headers for hashed assets", async () => {
     const headers = await Bun.file(join(dir, "public/_headers")).text();
     expect(headers).toContain("/assets/*");
     expect(headers).toContain("immutable");
-    expect(await Bun.file(join(dir, "public/images/projects/hypermedia-jobs.webp")).exists()).toBe(true);
+    expect(await Bun.file(join(dir, "public/favicon.svg")).exists()).toBe(true);
   });
 
   test("ships the cut-down fixi, not the upstream copy", async () => {

@@ -62,15 +62,17 @@ describe("pages", () => {
     }
   });
 
-  test("card images exist and have fixed dimensions", async () => {
-    for (const t of [...projects, ...recommendations, ...publications]) {
-      if (!("image" in t.art)) continue;
-      expect(await Bun.file(`public${t.art.image}`).exists()).toBe(true);
-    }
-    const body = await (await call("/projects")).text();
-    for (const img of body.match(/<img [^>]*>/g) ?? []) {
-      expect(img).toContain('width="640" height="400"');
-      expect(img).toContain('alt=""');
+  test("every card has a lettered cover; images sit over it, linked from the site itself", async () => {
+    for (const [path, items] of [["/projects", projects], ["/publications", publications], ["/recommendations", recommendations]] as const) {
+      const body = await (await call(path)).text();
+      for (const t of items) {
+        const cover = t.art.cover;
+        expect(body).toContain(`<span class="tile-art" aria-hidden="true">${cover.replaceAll("<", "&lt;").replaceAll(">", "&gt;")}`);
+        if (t.art.image) {
+          expect(t.art.image).toStartWith("https://");
+          expect(body).toContain(`<img class="tile-image" src="${t.art.image}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">`);
+        }
+      }
     }
   });
 

@@ -1,6 +1,7 @@
 import { asset } from "./assets";
 import { projects, publications, recommendations } from "./content";
 import type { Env } from "./env";
+import { feed } from "./feed";
 import type { Html } from "./html";
 import { isNavigation, page, redirect, withSecurityHeaders } from "./http";
 import { blogPage, cvPage, layoutPage, mainElement, postPage, tilesPage } from "./pages";
@@ -37,6 +38,10 @@ const routes: [pattern: RegExp, handler: Handler][] = [
   [/^\/cv$/, (ctx) => render(ctx, cvPage(!!ctx.env.CV_URL), { title: "CV" })],
   [/^\/cv\.pdf$/, cvPdf],
   [/^\/sitemap\.xml$/, sitemap],
+  [
+    /^\/feed\.xml$/,
+    (ctx) => new Response(feed(ctx.url.origin), { headers: { "content-type": "application/rss+xml; charset=utf-8", "cache-control": "public, max-age=3600" } }),
+  ],
 ];
 
 export default {

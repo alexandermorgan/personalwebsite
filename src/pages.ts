@@ -1,6 +1,6 @@
 // What goes into each template's placeholders. No markup here: that's in pages/.
 
-import { IMAGE_HEIGHT, IMAGE_WIDTH, type Tile } from "./content";
+import type { Tile } from "./content";
 import { Html } from "./html";
 import type { Post } from "./posts";
 import { EMPTY, fill, fillEach } from "./templates";
@@ -57,10 +57,10 @@ function tiles(items: Tile[]): Html {
     tagline: t.tagline,
     description: t.description,
     tone: t.tone,
-    art:
-      "image" in t.art
-        ? fill("partials/tile-image", { src: t.art.image, width: IMAGE_WIDTH, height: IMAGE_HEIGHT })
-        : fill("partials/tile-cover", { cover: t.art.cover }),
+    art: fill("partials/tile-art", {
+      cover: t.art.cover,
+      image: t.art.image ? fill("partials/tile-image", { src: t.art.image }) : EMPTY,
+    }),
   }));
 }
 

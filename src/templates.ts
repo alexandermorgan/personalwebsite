@@ -18,7 +18,7 @@ import notFound from "../pages/not-found.html" with { type: "text" };
 
 import tile from "../pages/partials/tile.html" with { type: "text" };
 import tileImage from "../pages/partials/tile-image.html" with { type: "text" };
-import tileCover from "../pages/partials/tile-cover.html" with { type: "text" };
+import tileArt from "../pages/partials/tile-art.html" with { type: "text" };
 import postItem from "../pages/partials/post-item.html" with { type: "text" };
 import postsEmpty from "../pages/partials/posts-empty.html" with { type: "text" };
 import cvReady from "../pages/partials/cv-ready.html" with { type: "text" };
@@ -37,7 +37,7 @@ const FILES = {
   "not-found": notFound,
   "partials/tile": tile,
   "partials/tile-image": tileImage,
-  "partials/tile-cover": tileCover,
+  "partials/tile-art": tileArt,
   "partials/post-item": postItem,
   "partials/posts-empty": postsEmpty,
   "partials/cv-ready": cvReady,

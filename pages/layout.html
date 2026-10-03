@@ -16,6 +16,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="{{title}}">
 <meta name="twitter:description" content="{{description}}">
+<link rel="alternate" type="application/rss+xml" title="Alexander Morgan" href="/feed.xml">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="{{app_css}}">
 <script src="{{site_js}}"></script>
@@ -43,8 +44,17 @@
 </header>
 {{main}}
 <footer class="site-footer">
-  <div class="container">
-    <p>© {{year}} Alexander Morgan · <a href="https://github.com/alexandermorgan" target="_blank" rel="noopener">GitHub</a></p>
+  <div class="container footer-bar">
+    <p>© {{year}} Alexander Morgan</p>
+    <nav aria-label="Elsewhere">
+      <ul class="footer-links">
+        <li><a href="https://x.com/lexandermorgan" target="_blank" rel="noopener">Twitter</a></li>
+        <li><a href="https://github.com/alexandermorgan" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/alexander-morgan-4356454/" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="https://scholar.google.com/citations?user=GOo0CYUAAAAJ" target="_blank" rel="noopener">Google Scholar</a></li>
+        <li><a href="/feed.xml" type="application/rss+xml">RSS</a></li>
+      </ul>
+    </nav>
   </div>
 </footer>
 </body>
