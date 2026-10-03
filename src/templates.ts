@@ -17,6 +17,7 @@ import cv from "../pages/cv.html" with { type: "text" };
 import notFound from "../pages/not-found.html" with { type: "text" };
 
 import tile from "../pages/partials/tile.html" with { type: "text" };
+import publication from "../pages/partials/publication.html" with { type: "text" };
 import tileImage from "../pages/partials/tile-image.html" with { type: "text" };
 import tileArt from "../pages/partials/tile-art.html" with { type: "text" };
 import postItem from "../pages/partials/post-item.html" with { type: "text" };
@@ -36,6 +37,7 @@ const FILES = {
   cv,
   "not-found": notFound,
   "partials/tile": tile,
+  "partials/publication": publication,
   "partials/tile-image": tileImage,
   "partials/tile-art": tileArt,
   "partials/post-item": postItem,

@@ -53,11 +53,16 @@ light theme shows correctly from the first paint.
 
 **Cards.** `/projects`, `/publications` and `/recommendations` list cards from `src/content.ts`. A card's face
 and its Link tab open the site in a new tab; its Description tab is a `<details>` whose description fills a
-panel below the tabs, making the card exactly twice as tall (same width), and scrolling if the text is longer.
-Card sizes are variables on `.tiles` in `styles/app.css`; each card's color is a `.tone-*` class. Each card
-has a lettered cover in its color, and optionally an image over it: the site's own `og:image` (or GitHub's
-card for a repository), linked from the site rather than copied here. It's shown whole within the cover's fixed
-box, so it can't shift the layout, and if it fails to load the cover shows instead.
+panel below the tabs, making the card exactly twice as tall (same width) and scrolling if the text is longer.
+The open card lies over the cards below instead of pushing them down (a negative bottom margin keeps its grid
+row the same height). Card sizes are variables on `.tiles` in `styles/app.css`; each card's color is a
+`.tone-*` class.
+
+Project and recommendation cards have a lettered cover in their color, and optionally an image over it: the
+site's own `og:image` (or GitHub's card for a repository), linked from the site rather than copied here. It's
+shown whole within the cover's fixed box, so it can't shift the layout, and if it fails to load the cover shows
+instead. Publication cards instead show the title, then the venue and the original publication date
+(`YYYY-MM-DD`, `YYYY-MM` or `YYYY`); their Description starts with the authors.
 
 **Blog.** Posts are listed in `src/posts.ts` (slug, title, date, summary), with each body as plain HTML in
 `posts/<slug>.html`. A post lives at `/blog/<slug>`.

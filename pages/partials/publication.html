@@ -1,0 +1,15 @@
+<li class="card tile publication tone-{{tone}}">
+  <a class="tile-face" href="{{url}}" target="_blank" rel="noopener">
+    <h2 class="tile-title">{{title}}</h2>
+    <p class="publication-venue">{{venue}}</p>
+    <p class="publication-date"><time datetime="{{date}}">{{date_text}}</time></p>
+  </a>
+  <a class="tile-tab tile-link" href="{{url}}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Link</a>
+  <details class="tile-details">
+    <summary class="tile-tab">Description</summary>
+    <div class="tile-panel" tabindex="0" role="region" aria-label="About {{title}}">
+      <p class="publication-authors">{{authors}}</p>
+      <p>{{description}}</p>
+    </div>
+  </details>
+</li>

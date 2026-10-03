@@ -4,7 +4,7 @@ import type { Env } from "./env";
 import { feed } from "./feed";
 import type { Html } from "./html";
 import { isNavigation, page, redirect, withSecurityHeaders } from "./http";
-import { blogPage, cvPage, layoutPage, mainElement, postPage, tilesPage } from "./pages";
+import { blogPage, cvPage, layoutPage, mainElement, postPage, publicationsPage, tilesPage } from "./pages";
 import { findPost, posts } from "./posts";
 import { fill } from "./templates";
 
@@ -28,7 +28,7 @@ type Handler = (ctx: Ctx) => Promise<Response> | Response;
 const routes: [pattern: RegExp, handler: Handler][] = [
   [/^\/$/, about],
   [/^\/projects$/, (ctx) => render(ctx, tilesPage("projects", projects), { title: "Projects" })],
-  [/^\/publications$/, (ctx) => render(ctx, tilesPage("publications", publications), { title: "Publications" })],
+  [/^\/publications$/, (ctx) => render(ctx, publicationsPage(publications), { title: "Publications" })],
   [
     /^\/recommendations$/,
     (ctx) => render(ctx, tilesPage("recommendations", recommendations), { title: "Recommendations" }),

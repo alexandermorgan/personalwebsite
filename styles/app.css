@@ -234,12 +234,14 @@ main:focus-visible {
 
 /* Cards (projects, publications, recommendations)
  *
- * Every card is --tile-height tall: the face (art, title, tagline) links to the
- * project, and the tab row along the bottom has a Link tab (the same link) and a
- * Description tab, the <summary> of a <details>. Opening it makes the card
- * exactly twice as tall, and the description fills the new half, scrolling if
- * it's longer. Fixed heights (images are cropped to fit) mean nothing shifts as the
- * page loads.
+ * Every card is --tile-height tall: the face (art, title, tagline; or for a
+ * publication its title, venue and date) links to the project, and the tab row
+ * along the bottom has a Link tab (the same link) and a Description tab, the
+ * <summary> of a <details>. Opening it makes the card exactly twice as tall, and
+ * the description fills the new half, scrolling if it's longer. The open card
+ * lies over whatever is below it rather than pushing it down: a negative bottom
+ * margin cancels the extra height, so its grid row keeps its size. Fixed heights
+ * (images are fitted inside them) mean nothing shifts as the page loads.
  */
 .tiles {
   --tile-height: 20rem;
@@ -254,11 +256,11 @@ main:focus-visible {
   padding: 0;
   list-style: none;
 }
-/* Publications have long titles: wider, taller cards with room for them. */
-.tiles.tiles-wide {
-  --tile-height: 22rem;
+/* Publications have long titles and no pictures: wider cards with room for them. */
+.tiles.publications {
+  --tile-height: 18rem;
   --tile-min-width: 18rem;
-  --tile-title-lines: 4;
+  --tile-title-lines: 6;
 }
 .card.tile {
   position: relative;
@@ -272,9 +274,13 @@ main:focus-visible {
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .card.tile:has(> .tile-details[open]) {
+  z-index: 1;
   height: calc(2 * var(--tile-height));
+  margin-bottom: calc(-1 * var(--tile-height));
+  border-color: var(--tone);
+  box-shadow: 0 12px 32px -8px oklch(0 0 0 / 0.45);
 }
-.card.tile:hover {
+.card.tile:hover:not(:has(> .tile-details[open])) {
   border-color: color-mix(in oklab, var(--tone) 60%, var(--border));
   box-shadow: 0 4px 16px -6px color-mix(in oklab, var(--tone) 45%, transparent);
 }
@@ -333,6 +339,29 @@ main:focus-visible {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   color: var(--muted-foreground);
+}
+
+/* A publication's face: title, venue and date, under a strip of the card's color. */
+.publication .tile-face {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-top: 4px solid var(--tone);
+}
+.publication .tile-face > * {
+  flex-shrink: 0;
+}
+.publication .tile-title {
+  margin-bottom: var(--space-1);
+}
+.publication-venue,
+.publication-date {
+  color: var(--muted-foreground);
+}
+.publication-authors {
+  margin-bottom: var(--space-2);
+  font-weight: var(--weight-medium);
 }
 
 .tile-tab {
@@ -394,6 +423,17 @@ main:focus-visible {
   padding: var(--space-4);
   border-top: 1px solid var(--border);
   line-height: var(--leading-relaxed);
+}
+/* Text scrolling out of the panel fades rather than being cut mid-line. */
+.tile-panel::after {
+  content: "";
+  position: sticky;
+  bottom: calc(-1 * var(--space-4));
+  display: block;
+  height: var(--space-6);
+  margin-top: calc(-1 * var(--space-6));
+  background-image: linear-gradient(transparent, var(--card));
+  pointer-events: none;
 }
 .tile-panel:focus-visible {
   outline-offset: -3px;

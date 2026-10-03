@@ -63,7 +63,7 @@ describe("pages", () => {
   });
 
   test("every card has a lettered cover; images sit over it, linked from the site itself", async () => {
-    for (const [path, items] of [["/projects", projects], ["/publications", publications], ["/recommendations", recommendations]] as const) {
+    for (const [path, items] of [["/projects", projects], ["/recommendations", recommendations]] as const) {
       const body = await (await call(path)).text();
       for (const t of items) {
         const cover = t.art.cover;
@@ -74,6 +74,23 @@ describe("pages", () => {
         }
       }
     }
+  });
+
+  test("publication cards show title, venue and date; the description starts with the authors", async () => {
+    const body = await (await call("/publications")).text();
+    expect(body).toContain('<li class="card tile publication tone-pink">');
+    expect(body).toContain('<p class="publication-venue">Intégral 33, pp. 47–71</p>');
+    expect(body).toContain('<time datetime="2024-12-06">December 6, 2024</time>');
+    expect(body).toContain('<time datetime="2016-08">August 2016</time>');
+    expect(body).toContain('<time datetime="2019">2019</time>');
+    expect(body).toContain('<p class="publication-authors">Alexander Morgan, Daniel Russo-Batterham and Richard Freedman</p>');
+    expect(body).not.toContain("tile-art");
+    for (const p of publications) {
+      expect(p.date).toMatch(/^\d{4}(-\d{2}(-\d{2})?)?$/);
+      expect(p.authors.length).toBeGreaterThan(0);
+    }
+    const dates = publications.map((p) => p.date);
+    expect(dates).toEqual([...dates].sort().reverse());
   });
 
   test("the blog lists every post, newest first, with links to them", async () => {

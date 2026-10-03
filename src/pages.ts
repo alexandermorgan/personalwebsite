@@ -1,6 +1,6 @@
 // What goes into each template's placeholders. No markup here: that's in pages/.
 
-import type { Tile } from "./content";
+import type { Publication, Tile } from "./content";
 import { Html } from "./html";
 import type { Post } from "./posts";
 import { EMPTY, fill, fillEach } from "./templates";
@@ -64,16 +64,36 @@ function tiles(items: Tile[]): Html {
   }));
 }
 
-export function tilesPage(name: "projects" | "publications" | "recommendations", items: Tile[]): Html {
+export function tilesPage(name: "projects" | "recommendations", items: Tile[]): Html {
   return fill(name, { tiles: tiles(items) });
 }
 
-/** "2026-10-03" -> "October 3, 2026" */
+/** ["A"] -> "A"; ["A", "B", "C"] -> "A, B and C" */
+export function listNames(names: string[]): string {
+  return names.length < 2 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
+}
+
+export function publicationsPage(items: Publication[]): Html {
+  const cards = fillEach("partials/publication", items, (p) => ({
+    title: p.title,
+    url: p.url,
+    venue: p.venue,
+    date: p.date,
+    date_text: formatDate(p.date),
+    authors: listNames(p.authors),
+    description: p.description,
+    tone: p.tone,
+  }));
+  return fill("publications", { tiles: cards });
+}
+
+/** "2026-10-03" -> "October 3, 2026"; "2016-08" -> "August 2016"; "2019" -> "2019" */
 export function formatDate(date: string): string {
-  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", {
+  const parts = date.split("-").length;
+  return new Date(`${date}${["", "-01-01", "-01", ""][parts]}T00:00:00Z`).toLocaleDateString("en-US", {
     year: "numeric",
-    month: "long",
-    day: "numeric",
+    month: parts > 1 ? "long" : undefined,
+    day: parts > 2 ? "numeric" : undefined,
     timeZone: "UTC",
   });
 }
