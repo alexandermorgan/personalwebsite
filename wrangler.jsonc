@@ -6,7 +6,7 @@
   "main": "dist/worker.js",
   "build": {
     "command": "bun scripts/build.ts",
-    "watch_dir": ["src", "pages", "posts", "client", "styles", "vendor", "public"]
+    "watch_dir": ["src", "pages", "client", "styles", "vendor", "public"]
   },
   "no_bundle": true,
   "find_additional_modules": false,
@@ -19,7 +19,16 @@
   ],
   "workers_dev": false,
   "observability": { "enabled": true },
-  "assets": { "directory": "dist/public", "binding": "ASSETS" },
+  "assets": {
+    "directory": "dist/public",
+    "binding": "ASSETS",
+    // Files are served at exactly their own paths: the worker reads
+    // /_pages/projects.html itself, and no URL maps to a .html file on its own.
+    "html_handling": "none",
+    // Static files are served before the worker runs, except the page files,
+    // which only the worker may read (it answers /_pages/* with a 404).
+    "run_worker_first": ["/_pages/*"]
+  },
   "vars": {
     // The CV PDF's URL (e.g. a public R2 URL); the worker serves it at /cv.pdf.
     // Empty: /cv says the CV is coming soon.

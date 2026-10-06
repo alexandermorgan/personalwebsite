@@ -6,95 +6,79 @@ this file covers how the site is built with HTML and the rules that keep it smal
 ## The idea
 
 The server sends HTML and the browser shows it. There is no client-side rendering, no framework, no
-templating language, and no runtime dependencies. One Cloudflare Worker (`src/worker.ts`) renders every page.
+templating language, and no runtime dependencies. One Cloudflare Worker (`src/worker.ts`) serves every page.
 [fixi.js](https://github.com/bigskysoftware/fixi) (vendored and cut down in `vendor/fixi/`) adds in-place
-navigation by fetching a page's `<main>` from the server and swapping it in. Every page still works as a
-plain link without JavaScript.
+navigation by fetching a page and swapping it into `<main>`. Every page still works as a plain link without
+JavaScript.
 
 Before adding anything, check whether HTML, CSS or an existing helper already does it. Usually one does.
 
-## How HTML is produced
+## Pages are files
 
 **Content and markup live only in `.html` files.** TypeScript never builds HTML strings, and content is not
 kept as data in TypeScript or JSON to be turned into markup. A project card, a publication or a paragraph
-about me is written as HTML in the page that shows it.
+about me is written out as HTML in the page that shows it. A list of three things is three `<li>`s in the
+file, not a loop.
 
-- `pages/*.html`: one file per page (`home.html`, `projects.html`, `publications.html`, …), with everything
-  that page shows. There are no partials.
-- `posts/<slug>.html`: the body of each blog post. `src/posts.ts` lists the posts (slug, title, date,
-  summary), because the blog index, the post page, the RSS feed and the sitemap all need that list.
-- `pages/layout.html`: the document around every page: `<head>`, header, footer. `pages/main.html` is the
-  `<main id="main" data-title="…">` that in-place navigation returns; it carries the page title, since only
-  `<main>` is swapped.
+**One file per URL.** `/projects` is `pages/projects.html`, `/` is `pages/home.html`, and the post
+`/blog/<slug>` is `pages/blog/<slug>.html`. There is no list of pages or routes anywhere: the build puts
+the page files in the static assets under `/_pages/`, and the worker reads the one that matches the URL.
+Files whose names start with `_` are never URLs (a request for any path with a segment starting with `_` is
+a 404); they are only used to put pages together:
 
-TypeScript only supplies values that vary per request (the path, the year, asset URLs, whether the CV is
-available) or that come from a list used in more than one place (the posts).
+- `pages/_layout.html`: the document around every page: `<head>` with what is the same on every page
+  (stylesheet, scripts, favicon, feed link), the header and navbar, an empty `<main id="main">`, the footer.
+- `pages/_not-found.html`: the 404 page.
+- `pages/_post-item.html`: one post in the blog index (see below).
 
-**Templates are plain HTML, filled by HTMLRewriter.** There are no conditionals, loops or filters in
-expressions, and no template language. The first time a response uses a template, `HTMLRewriter` reads it
-once and marks where values go; from then on, filling it is only joining strings, with no parser calls.
-What gets filled:
+**Each page file starts with its own head metadata**: its `<title>`, then `<meta name="description">`, then
+its content:
 
-| In the template | Gets |
-| --- | --- |
-| `<time data-fill="date">` | its content set to the value |
-| `<slot name="page"></slot>` | replaced by the value: text, `Html`, or a part (the page inside the layout) |
-| `<p data-if="summary">` | kept only when the value is truthy; what's inside needs no values otherwise |
-| `<li data-each="posts">` | repeated once per item of the list, each filled from that item's values |
-| `href="/blog/{{slug}}"` | the value inside the attribute; a whole-value `{{x}}` is left out when `false`, empty when `true` |
-| `.nav-links a` | `aria-current="page"` when its `href` is the page's `path`, `"true"` when the path is inside it (a post under `/blog`) |
+```html
+<title>Projects · Alexander Morgan</title>
+<meta name="description" content="Websites, games and libraries I've built or worked on.">
+<header class="page-header">
+  <h1>Projects</h1>
+  …
+</header>
+<ul class="tiles">
+  <li class="card tile tone-green">…</li>
+</ul>
+```
 
-Indentation in templates is for reading them and isn't sent (so never indent inside `<pre>` or `<textarea>`).
+Anything that differs from page to page goes at the top of the page file, never in `_layout.html`. The
+layout's canonical link and Open Graph/Twitter tags are filled from the page's title, description and URL
+(`og:type` is `article` under `/blog/`), so page files don't repeat them.
 
-The TypeScript decides *which* template to use and *what* values go in:
+A blog post's file is the same, with its summary as the description and its content an `<article>` with the
+title in `<h1>` and the date in `<time datetime="YYYY-MM-DD">`. Those three are what the blog index, the feed
+and the sitemap read from it.
 
-- `src/pages.ts`: one function per page that needs values, returning a `part(template, values)`. Lists are
-  arrays of values for `data-each`. It contains no markup and renders nothing.
-- `src/templates.ts`: compiles templates when first used, and provides `part()` and `fill()`. Each response
-  calls `fill()` once.
-- `src/html.ts`: `escape()` and the `Html` wrapper.
+## One URL, two responses
 
-Rules that filling enforces:
+Each URL serves both a full document and an in-place update:
 
-- Every value a rendered element uses must be given; a missing one throws instead of rendering blank. Each
-  `data-each` item sees only its own values.
-- Strings and numbers are always HTML-escaped, in text and attributes. Only `Html` values (a post body, a
-  filled part) are inserted as is. Don't build an `Html` from a string by hand to get around escaping.
+- **Direct load** (bookmark, reload, other site, crawler, no JS): the worker assembles the page with
+  `HTMLRewriter`: the page's `<title>` and description go into the layout's `<head>` (and its canonical and
+  Open Graph tags), the rest of the file into `<main id="main">`, and the navbar link for the page gets
+  `aria-current="page"` (`"true"` for a page inside a section, like a post under `/blog`).
+- **In-page navigation** (`FX-Request: true` on a GET, see `isNavigation()` in `src/http.ts`): the worker
+  sends the page file as is. fixi sets the document's title and description from the file's leading
+  `<title>` and `<meta name="description">`, and swaps the rest into `<main>`.
 
-**Bun and workerd differ.** Tests run on Bun's `HTMLRewriter` and production on workerd's. For example,
-workerd's `element.attributes` is a live iterator that throws if an attribute changes mid-loop, which Bun
-allows. After changing how templates are compiled, check pages under `bun run preview` too, not just
-`bun test`. Don't use Bun-only overloads such as `transform(string)` in `src/`.
+Both have the page's real status (a missing page is `_not-found.html` with a 404 either way) and
+`Vary: FX-Request`, so a cache never serves one for the other. A test checks that the in-place response and
+the full page agree on the title, description and content.
 
-**Adding a page:** create the `.html` file, add its import and its entry in `src/templates.ts`, add the route
-in `src/worker.ts` (and to the sitemap there), and add the path to `PAGES` in `test/helpers.ts` so the
-page-wide tests cover it. A page in the navbar also needs its link in `pages/layout.html`. Pages with fixed
-content (home, projects, publications, recommendations, not-found) have nothing to fill.
+`<body fx-action="/" fx-trigger="site:navigate" fx-target="#main">` in the layout is the only fixi element. A
+click on a same-site link goes through `site.link()` in `client/site.js`, which decides whether to load it in
+place (other sites, modifier clicks, `target`, `download`, files like `/cv.pdf` and anchors on the same page
+are left to the browser) and then dispatches `site:navigate` on `<body>`. Back/forward does the same. On
+`fx:swapped`, `site.js` updates the URL (after any redirect), the navbar's `aria-current`, the scroll
+position and focus. A response that doesn't start with `<title>`, or a network error, falls back to a full
+page load. Add `data-reload` to a link that must always load the full page.
 
-## One route, two responses
-
-Each URL serves both a full document and an in-place update, from the same handler:
-
-- **Direct load** (bookmark, reload, other site, no JS): `render()` in `src/worker.ts` wraps the body in
-  `layout.html` and returns the full document.
-- **In-page navigation** (`FX-Request: true` on a GET, see `isNavigation()` in `src/http.ts`): `render()`
-  returns only the filled `main.html`, which fixi swaps in for `<main id="main">`. It must be exactly the
-  full page's `<main>` (a test checks this).
-
-Both have the page's real status (a missing page is a 404 either way) and `Vary: FX-Request`, so a cache
-never serves one for the other.
-
-`<body fx-action="/" fx-trigger="site:navigate" fx-target="#main">` in `pages/layout.html` is the only fixi
-element. A click on a same-site link goes through `site.link()` in `client/site.js`, which decides whether to
-load it in place (other sites, modifier clicks, `target`, `download`, files like `/cv.pdf` and anchors on the
-same page are left to the browser) and then dispatches `site:navigate` on `<body>`. Back/forward does the
-same. On `fx:swapped`, `site.js` updates the URL (after any redirect), the title from `data-title`, the
-navbar's `aria-current`, the scroll position and focus. A response that isn't a `<main id="main"`, or a
-network error, falls back to a full page load. Add `data-reload` to a link that must always load the full
-page.
-
-Handlers call `render()` (or `redirect()`) and don't check request headers themselves. Redirects work in
-place too: `fetch` follows them and `site.js` shows the final URL.
+Redirects work in place too: `fetch` follows them and `site.js` shows the final URL.
 
 The worker answers only GET and HEAD. There are no forms. If one is ever needed, it is a real
 `<form method="post" action="…">` that works without JavaScript; handling it in place means restoring fixi's
@@ -103,17 +87,48 @@ form support (see below), not writing new client code.
 Keep the request counts low: a page load is one HTML response plus three cached assets (`app.css`, `site.js`,
 `fixi.js`) and any card images, and an in-page navigation is one request.
 
+## HTMLRewriter does the filling
+
+The only HTML the code touches is moving parts of files into other files, and it does that with
+`HTMLRewriter`, never with string concatenation or regular expressions. Set text and attributes with its
+setters, which escape; insert markup (`{ html: true }`) only when it is a whole file or a part of one.
+
+**Bun and workerd differ.** Tests run on Bun's `HTMLRewriter` and production on workerd's. For example,
+workerd's `element.attributes` is a live iterator that throws if an attribute changes mid-loop, which Bun
+allows. After changing how pages are assembled, check them under `bun run preview` too, not just `bun test`.
+Don't use Bun-only overloads such as `transform(string)` in `src/`.
+
+## Lists come from folders, at build time
+
+Some things need a list: the blog index, `/feed.xml` (every post, in full, then every project) and
+`/sitemap.xml` (every page). `scripts/site.ts` makes them from the files, and `scripts/build.ts`, which
+Cloudflare runs on every push to `main` before deploying, writes them out, so adding a post is only adding
+`pages/blog/<slug>.html`, and adding a project is only adding its card to `pages/projects.html`. It reads each
+post's `<h1>`, description and `<time datetime>`, newest first, and each project card's `.tile-title`,
+`.tile-face` link and `.tile-panel` description, in page order, and:
+
+- fills `#posts` in `pages/blog.html` with one `pages/_post-item.html` per post, using `HTMLRewriter`
+  (its `data-post` elements get the link, date and summary),
+- writes `feed.xml` (each post's `<article>` without its `<header>`, links made absolute, then each project
+  linking to the project itself) and `sitemap.xml` as static files. That XML is the only markup written in
+  code.
+
+Nothing generated is committed, and there is no git hook: `bun run dev` and the tests run the same
+`scripts/site.ts`, so they always see the current folders.
+
 ## Keeping it minimal
 
 **Dependencies.** None at runtime. Dev dependencies are only `wrangler`, `typescript` and `@types/bun`. Don't
-add packages. Use the Workers runtime, Web APIs and Bun's built-ins (`bun:test`, `Bun.CryptoHasher`).
-Third-party code that has to ship is vendored with its license, and only the parts in use.
+add packages. Use the Workers runtime, Web APIs and Bun's built-ins (`bun:test`, `Bun.CryptoHasher`,
+`Bun.Glob`). Third-party code that has to ship is vendored with its license, and only the parts in use.
 
-**fixi.** `vendor/fixi/fixi.js` is `fixi.upstream.js` with code only deleted: nothing added, reordered or
-rewritten. `test/fixi.test.ts` checks this, line by line. To use a removed feature (`fx-*` attributes on other
-elements, form handling, other swap strategies, the MutationObserver for swapped-in `fx-*` elements), restore
-those lines from `fixi.upstream.js` and update the table in `vendor/fixi/README.md`. Never edit `fixi.js`
-otherwise.
+**fixi.** `vendor/fixi/fixi.js` is `fixi.upstream.js` with code deleted, plus one addition between
+`// [added]` and `// [/added]`: the swap that puts a page's `<title>` and description into `<head>` and the
+rest into the target. `test/fixi.test.ts` checks, line by line, that everything outside the marked block is
+upstream code with characters removed. To use a removed feature (`fx-*` attributes on other elements, form
+handling, the MutationObserver for swapped-in `fx-*` elements), restore those lines from
+`fixi.upstream.js`. Avoid further additions; if one is unavoidable, mark it the same way. Either way, update
+`vendor/fixi/README.md`.
 
 **JavaScript.** The client JS is the cut-down fixi plus `client/site.js` (theme, link interception, history
 and scroll), about 160 lines. Reach for HTML and CSS first (a card's description is a `<details>`), then
@@ -130,7 +145,7 @@ loosen it.
 - `vendor/basecoat/` contains only the Basecoat components in use (button, card, switch), ported from
   Tailwind `@apply` to plain CSS. Use their markup conventions (`.btn[data-variant]`,
   `.card > header/section/footer`, `.switch`, …). To add one, follow `vendor/basecoat/README.md` and list it
-  in `CSS_FILES` in `scripts/assets.ts`.
+  in `CSS_FILES` in `scripts/site.ts`.
 - `styles/base.css` and `styles/app.css` hold everything else.
 - Everything is concatenated into one content-hashed `app.css`. No web fonts (system font stacks), and nothing
   that loads late or shifts the layout: every image and card has a fixed size.
@@ -141,9 +156,10 @@ and cached forever) so a saved theme applies before first paint. Style both them
 **Links.** External links always open in a new tab (`target="_blank" rel="noopener"`); a test checks every
 page. Internal links are plain `<a href>` and must resolve (also tested).
 
-**Build.** `scripts/build.ts` bundles the worker and writes hashed `app.css`, `site.js` and `fixi.js`,
-served `immutable` (`public/_headers`). Only `src/` ships. `test/build.test.ts` checks that no `dev/` or
-`test/` code ends up in the bundle and that the cut-down fixi ships, not the upstream copy.
+**Build.** `scripts/build.ts` bundles the worker and writes every static file `scripts/site.ts` makes into
+`dist/public`: `public/`, the page files, the lists above, and hashed `app.css`, `site.js` and `fixi.js`
+(served `immutable`, see `public/_headers`) with the layout pointed at them. Only `src/` ships as code, and it
+holds no content. `test/build.test.ts` checks that no `dev/` or `test/` code ends up in the bundle.
 
 **Storage.** None. Content lives in the repo and ships with the worker. The CV PDF lives in R2 and the worker
 fetches it from its public URL (`CV_URL` in `wrangler.jsonc`) to serve it at `/cv.pdf`. Don't add D1, KV, R2
@@ -154,26 +170,23 @@ abstractions. Prefer deleting code to adding options. Match the comment density 
 surrounding code. Accessibility comes from the HTML: real `<a>`, `<button>`, `<label>`, `<details>`,
 `<time>`, the skip link, `aria-current`, and focus moved to `<main>` after in-place navigation.
 
-## Where the code doesn't match this yet
+## Adding things
 
-The site predates these rules in places. When working near these, move toward the rules rather than
-extending the old pattern:
-
-- Cards on `/projects`, `/publications` and `/recommendations` are data in `src/content.ts`, filled into
-  `pages/partials/*.html`. They belong as HTML in their pages. `src/feed.ts` also reads the projects from
-  `src/content.ts`, so the feed will need another source.
-- `src/templates.ts` fills `{{name}}` placeholders by string replacement, with partials and `fillEach()`,
-  instead of compiling `data-fill`/`slot`/`data-if`/`data-each` templates with HTMLRewriter.
-- The navbar's `aria-current` is passed in as `current_*` values from `src/pages.ts`.
+- **A page:** create `pages/<name>.html`, starting from another page's file. It's live at `/<name>`. To put
+  it in the navbar, add a link to `pages/_layout.html`.
+- **A blog post:** create `pages/blog/<slug>.html`. The blog index, feed and sitemap pick it up on the next
+  build (or right away under `bun run dev`).
+- **A project:** add its card to `pages/projects.html`, copying another card. The feed picks it up the same way.
 
 ## Checklist for a change
 
-1. Content and markup changes go in `pages/` (or `posts/`), with any values from `src/pages.ts`.
+1. Content and markup changes go in `pages/`.
 2. The feature works with JavaScript disabled (links do full loads), and in place with it.
 3. No new dependency, script, stylesheet, external origin or storage service.
 4. New values use tokens in `styles/tokens.css`.
 5. `bun run check` passes (typecheck + `bun:test`, under a second). Tests call the worker's `fetch` handler
-   directly through `call()` in `test/helpers.ts` (`fx: true` for in-place navigation, `env` for `CV_URL`),
-   so add a test in `test/` for new routes or templates.
-6. To see it running: `bun run dev` → http://localhost:8787 (set `CV_URL` to try the CV page with a real PDF),
+   directly through `call()` in `test/helpers.ts`, with the site's static files as its `ASSETS` (`fx: true`
+   for in-place navigation, `env` for `CV_URL`). Page-wide tests run on every file in `pages/`, so a new page
+   is covered without listing it.
+6. To see it running: `bun run dev` → http://localhost:8787 (set `CV_URL` to try `/cv.pdf` with a real PDF),
    and `bun run preview` to run the production build on workerd.

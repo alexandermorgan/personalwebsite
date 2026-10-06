@@ -1,4 +1,5 @@
-import type { Html } from "./html";
+// Response headers (the CSP and other security headers) and the small helpers
+// the worker builds its responses with.
 
 export const CSP = [
   "default-src 'self'",
@@ -29,15 +30,14 @@ export function withSecurityHeaders(response: Response): Response {
 }
 
 /**
- * HTML for a page route: the full document, or (for in-page navigation) just its
- * <main>. Both vary on FX-Request, so a cache never serves one for the other.
+ * HTML for a page: the full document, or (for in-page navigation) just the page
+ * file. Both vary on FX-Request, so a cache never serves one for the other.
  */
-export function page(body: Html, init: ResponseInit = {}): Response {
-  const headers = new Headers(init.headers);
-  headers.set("content-type", "text/html; charset=utf-8");
-  if (!headers.has("cache-control")) headers.set("cache-control", "no-cache");
-  headers.set("vary", "fx-request");
-  return new Response(body.toString(), { ...init, headers });
+export function page(body: string, status = 200): Response {
+  return new Response(body, {
+    status,
+    headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-cache", vary: "fx-request" },
+  });
 }
 
 export function redirect(location: string, status = 301): Response {

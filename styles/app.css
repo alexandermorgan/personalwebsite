@@ -38,11 +38,13 @@
   padding-block: var(--space-2);
 }
 .brand {
-  color: var(--brand);
   font-family: var(--font-mono);
   font-size: var(--text-lg);
   font-weight: var(--weight-medium);
   white-space: nowrap;
+}
+.brand a {
+  color: var(--brand);
   text-decoration: none;
 }
 .site-nav {

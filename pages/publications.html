@@ -1,7 +1,113 @@
+<title>Publications · Alexander Morgan</title>
+<meta name="description" content="Alexander Morgan's website: projects, publications, writing and recommendations, on music theory, computational musicology, machine learning and the web.">
 <header class="page-header">
   <h1>Publications</h1>
   <p class="lede">Papers, essays and my dissertation. Click a card to read it, or open its description for a summary.</p>
 </header>
 <ul class="tiles publications">
-{{tiles}}
+  <li class="card tile publication tone-pink">
+    <a class="tile-face" href="https://arxiv.org/abs/2412.05436v2" target="_blank" rel="noopener">
+      <h2 class="tile-title">pyAMPACT: A Score-Audio Alignment Toolkit for Performance Data Estimation and Multi-modal Processing</h2>
+      <p class="publication-venue">arXiv preprint</p>
+      <p class="publication-date"><time datetime="2024-12-06">December 6, 2024</time></p>
+    </a>
+    <a class="tile-tab tile-link" href="https://arxiv.org/abs/2412.05436v2" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Link</a>
+    <details class="tile-details">
+      <summary class="tile-tab">Description</summary>
+      <div class="tile-panel" tabindex="0" role="region" aria-label="About pyAMPACT: A Score-Audio Alignment Toolkit for Performance Data Estimation and Multi-modal Processing">
+        <p class="publication-authors">Johanna Devaney, Daniel McKemie and Alex Morgan</p>
+        <p>pyAMPACT (Python-based Automatic Music Performance Analysis and Comparison Toolkit) links symbolic and audio music representations to estimate performance data from audio, guided by the score. It reads a range of symbolic formats, uses score alignment to find the time-frequency regions that matter for each note, and estimates tuning, dynamics, timbre and timing descriptors, which it can write to MEI files linked to the notes. Beyond performance data, it provides the infrastructure for linking symbolic representations and annotations to audio for multi-modal research.</p>
+      </div>
+    </details>
+  </li>
+  <li class="card tile publication tone-indigo">
+    <a class="tile-face" href="https://arxiv.org/abs/2408.04653" target="_blank" rel="noopener">
+      <h2 class="tile-title">Batching BPE Tokenization Merges</h2>
+      <p class="publication-venue">arXiv preprint</p>
+      <p class="publication-date"><time datetime="2024-08-05">August 5, 2024</time></p>
+    </a>
+    <a class="tile-tab tile-link" href="https://arxiv.org/abs/2408.04653" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Link</a>
+    <details class="tile-details">
+      <summary class="tile-tab">Description</summary>
+      <div class="tile-panel" tabindex="0" role="region" aria-label="About Batching BPE Tokenization Merges">
+        <p class="publication-authors">Alexander P. Morgan</p>
+        <p>The Byte Pair Encoding algorithm can be safely batched to merge hundreds of pairs of tokens at a time when building up a tokenizer's vocabulary. Combined with reducing the memory footprint of the training text, this makes it feasible to train a high-quality tokenizer on a basic laptop. The paper presents BatchBPE, an open-source pure Python implementation, and uses it to explore the batch merging process and to experiment with preprocessing a stop-word list and ignoring the least common text chunks in a dataset.</p>
+      </div>
+    </details>
+  </li>
+  <li class="card tile publication tone-teal">
+    <a class="tile-face" href="https://crim-essays.crimproject.org/crim-essays-and-explorations/morgan-automatic-cadence-detection/" target="_blank" rel="noopener">
+      <h2 class="tile-title">Automated Detection of Renaissance Cadential Voice Functions and Cadences</h2>
+      <p class="publication-venue">CRIM Project Perspectives</p>
+      <p class="publication-date"><time datetime="2023">2023</time></p>
+    </a>
+    <a class="tile-tab tile-link" href="https://crim-essays.crimproject.org/crim-essays-and-explorations/morgan-automatic-cadence-detection/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Link</a>
+    <details class="tile-details">
+      <summary class="tile-tab">Description</summary>
+      <div class="tile-panel" tabindex="0" role="region" aria-label="About Automated Detection of Renaissance Cadential Voice Functions and Cadences">
+        <p class="publication-authors">Alexander Morgan</p>
+        <p>An essay for Citations: The Renaissance Imitation Mass (CRIM) on detecting cadential voice functions and suspension-based cadences in Renaissance polyphony automatically, using only interval-succession information. It updates the tools from the 2022 Music Encoding Conference paper with significant improvements in accuracy and reliability, and traces the theoretical and compositional origins of the cadence types they find.</p>
+      </div>
+    </details>
+  </li>
+  <li class="card tile publication tone-blue">
+    <a class="tile-face" href="https://crim-essays.crimproject.org/crim-essays-and-explorations/morgan-russobatterham-freedman-defining-cadences/" target="_blank" rel="noopener">
+      <h2 class="tile-title">Musicologists and Data Scientists Pull out all the Stops: Defining Renaissance Cadences Systematically</h2>
+      <p class="publication-venue">Music Encoding Conference Proceedings 2022, pp. 89–98</p>
+      <p class="publication-date"><time datetime="2022">2022</time></p>
+    </a>
+    <a class="tile-tab tile-link" href="https://crim-essays.crimproject.org/crim-essays-and-explorations/morgan-russobatterham-freedman-defining-cadences/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Link</a>
+    <details class="tile-details">
+      <summary class="tile-tab">Description</summary>
+      <div class="tile-panel" tabindex="0" role="region" aria-label="About Musicologists and Data Scientists Pull out all the Stops: Defining Renaissance Cadences Systematically">
+        <p class="publication-authors">Alexander Morgan, Daniel Russo-Batterham and Richard Freedman</p>
+        <p>How a team of musicologists and data scientists developed CRIM Intervals, a Python and Pandas toolkit for Citations: The Renaissance Imitation Mass: modeling human expertise in terms computers can use to analyze encoded scores, and presenting the results in forms scholars can interrogate and refine. Taking the cadence as a case study, it covers everything from defining the constraints of a musical event to refining the tools to eliminate false negatives and positives.</p>
+      </div>
+    </details>
+  </li>
+  <li class="card tile publication tone-amber">
+    <a class="tile-face" href="https://theory.esm.rochester.edu/integral/wp-content/uploads/2020/02/Integral_Vol_33_morgan.pdf" target="_blank" rel="noopener">
+      <h2 class="tile-title">Renaissance Ternary Suspensions in Theory and Practice</h2>
+      <p class="publication-venue">Intégral 33, pp. 47–71</p>
+      <p class="publication-date"><time datetime="2019">2019</time></p>
+    </a>
+    <a class="tile-tab tile-link" href="https://theory.esm.rochester.edu/integral/wp-content/uploads/2020/02/Integral_Vol_33_morgan.pdf" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Link</a>
+    <details class="tile-details">
+      <summary class="tile-tab">Description</summary>
+      <div class="tile-panel" tabindex="0" role="region" aria-label="About Renaissance Ternary Suspensions in Theory and Practice">
+        <p class="publication-authors">Alexander Morgan</p>
+        <p>Renaissance suspensions differ from their tonal counterparts, chiefly because of an additional component theorized here for the first time: the perfection phase, which comes immediately after the resolution. The difference in metric structure is especially significant in ternary meter. A corpus study using the Humdrum Renaissance dissonance classifier shows how common ternary suspensions are and how they track changes in compositional style, and a survey of dozens of treatises and textbooks shows how they have been overlooked in teaching for centuries.</p>
+      </div>
+    </details>
+  </li>
+  <li class="card tile publication tone-red">
+    <a class="tile-face" href="https://mcgill.scholaris.ca/bitstreams/8ba066f4-f8bc-4539-acd2-e0298923cc04/download" target="_blank" rel="noopener">
+      <h2 class="tile-title">Renaissance Interval-Succession Theory: Treatises and Analysis</h2>
+      <p class="publication-venue">PhD dissertation, McGill University</p>
+      <p class="publication-date"><time datetime="2016-08">August 2016</time></p>
+    </a>
+    <a class="tile-tab tile-link" href="https://mcgill.scholaris.ca/bitstreams/8ba066f4-f8bc-4539-acd2-e0298923cc04/download" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Link</a>
+    <details class="tile-details">
+      <summary class="tile-tab">Description</summary>
+      <div class="tile-panel" tabindex="0" role="region" aria-label="About Renaissance Interval-Succession Theory: Treatises and Analysis">
+        <p class="publication-authors">Alexander Morgan</p>
+        <p>Interval-succession treatises taught idiomatic polyphony for centuries by listing which vertical intervals between two voices could follow one another. This dissertation is the first comprehensive, computer-assisted study of their examples. It refutes the common belief that Tinctoris's list of 768 interval successions is exhaustive and uncovers nine tacit voice-leading principles behind it, gives the first in-depth study of Pietro Pontio's 123 interval successions and his inclusion of dissonance, and examines contrapuntal rhythm in theory and analysis.</p>
+      </div>
+    </details>
+  </li>
+  <li class="card tile publication tone-violet">
+    <a class="tile-face" href="https://music.unt.edu/mhte/sites/default/files/janacek-harmonia-final.pdf#page=69" target="_blank" rel="noopener">
+      <h2 class="tile-title">Untangling Spletna: The Interaction of Janáček's Theories and the Transformational Structure of On an Overgrown Path</h2>
+      <p class="publication-venue">Harmonia, special issue Leoš Janáček: Life, Work, and Contribution, pp. 65–78</p>
+      <p class="publication-date"><time datetime="2013-05">May 2013</time></p>
+    </a>
+    <a class="tile-tab tile-link" href="https://music.unt.edu/mhte/sites/default/files/janacek-harmonia-final.pdf#page=69" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Link</a>
+    <details class="tile-details">
+      <summary class="tile-tab">Description</summary>
+      <div class="tile-panel" tabindex="0" role="region" aria-label="About Untangling Spletna: The Interaction of Janáček's Theories and the Transformational Structure of On an Overgrown Path">
+        <p class="publication-authors">Alexander Morgan</p>
+        <p>Janáček's idiosyncratic music theories never gained much currency with other theorists, but they were essential to his own compositional process. This article uses them to gain perspective on his piano cycle On an Overgrown Path, and shows how noteworthy moments in the cycle are mirrored in the transformational structure of several of its pieces, in particular the relative and parallel transformations and their combinations.</p>
+      </div>
+    </details>
+  </li>
 </ul>

@@ -3,27 +3,30 @@ import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { build } from "../scripts/build";
-import { CSS_FILES, hashedName, loadAssets } from "../scripts/assets";
+import { hashedName, site } from "../scripts/site";
 
 let dir: string;
-let manifest: Record<string, string>;
 let bundle: string;
 
 beforeAll(async () => {
   dir = await mkdtemp(join(tmpdir(), "site-build-"));
-  manifest = await build(dir);
+  await build(dir);
   bundle = await Bun.file(join(dir, "worker.js")).text();
 });
 afterAll(() => rm(dir, { recursive: true, force: true }));
 
 describe("build", () => {
-  test("writes content-hashed assets and bakes their URLs into the worker", async () => {
-    expect(Object.keys(manifest).sort()).toEqual(["app.css", "fixi.js", "site.js"]);
+  test("writes content-hashed assets and points the layout at them", async () => {
     const files = await readdir(join(dir, "public/assets"));
-    for (const url of Object.values(manifest)) {
-      expect(url).toMatch(/^\/assets\/[a-z]+\.[0-9a-f]{10}\.(css|js)$/);
-      expect(files).toContain(url.slice("/assets/".length));
-      expect(bundle).toContain(url);
+    const layout = await Bun.file(join(dir, "public/_pages/_layout.html")).text();
+    const used = [...layout.matchAll(/"\/assets\/([^"]+)"/g)].map((m) => m[1]);
+    expect(used.sort()).toEqual(files.sort());
+    for (const file of files) expect(file).toMatch(/^[a-z]+\.[0-9a-f]{10}\.(css|js)$/);
+  });
+
+  test("writes every page file, so the worker can read them", async () => {
+    for (const path of (await site()).keys()) {
+      if (path.startsWith("/_pages/")) expect(await Bun.file(join(dir, "public", path)).exists()).toBe(true);
     }
   });
 
@@ -32,17 +35,11 @@ describe("build", () => {
     expect(hashedName("app.css", "a")).toBe(hashedName("app.css", "a"));
   });
 
-  test("copies public files, including cache headers for hashed assets", async () => {
-    const headers = await Bun.file(join(dir, "public/_headers")).text();
-    expect(headers).toContain("/assets/*");
-    expect(headers).toContain("immutable");
-    expect(await Bun.file(join(dir, "public/favicon.svg")).exists()).toBe(true);
-  });
-
-  test("ships the cut-down fixi, not the upstream copy", async () => {
-    const fixi = await Bun.file(join(dir, "public", manifest["fixi.js"]!)).text();
-    expect(fixi).toBe(await Bun.file(join(import.meta.dir, "../vendor/fixi/fixi.js")).text());
-    expect(await readdir(join(dir, "public/assets"))).not.toContain("fixi.upstream.js");
+  test("copies every public file unchanged", async () => {
+    const source = join(import.meta.dir, "../public");
+    for (const file of await readdir(source)) {
+      expect(await Bun.file(join(dir, "public", file)).text()).toBe(await Bun.file(join(source, file)).text());
+    }
   });
 
   test("the worker bundle ships no test or dev code", () => {
@@ -55,10 +52,8 @@ describe("build", () => {
     expect(typeof mod.default.fetch).toBe("function");
   });
 
-  test("app.css is plain CSS from the vendored components we list", async () => {
-    const css = (await loadAssets())["app.css"]!.body;
-    for (const file of CSS_FILES) expect(await Bun.file(join(import.meta.dir, "..", file)).exists()).toBe(true);
-    for (const cls of [".switch", ".btn", ".card", ".tile"]) expect(css).toContain(cls);
+  test("app.css is plain CSS, with nothing left of Tailwind", async () => {
+    const css = (await site()).get("/assets/app.css")!.body as string;
     expect(css).not.toContain("@apply");
     expect(css).not.toContain("--tw-");
   });

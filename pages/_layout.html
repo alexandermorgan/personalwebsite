@@ -3,37 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{title}}</title>
-<meta name="description" content="{{description}}">
-<link rel="canonical" href="{{url}}">
+<title></title>
+<meta name="description" content="">
+<link rel="canonical" href="">
 <meta name="author" content="Alexander Morgan">
-<meta property="og:type" content="{{og_type}}">
+<meta property="og:type" content="website">
 <meta property="og:site_name" content="Alexander Morgan">
 <meta property="og:locale" content="en_US">
-<meta property="og:title" content="{{title}}">
-<meta property="og:description" content="{{description}}">
-<meta property="og:url" content="{{url}}">
+<meta property="og:title" content="">
+<meta property="og:description" content="">
+<meta property="og:url" content="">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="{{title}}">
-<meta name="twitter:description" content="{{description}}">
+<meta name="twitter:title" content="">
+<meta name="twitter:description" content="">
 <link rel="alternate" type="application/rss+xml" title="Alexander Morgan" href="/feed.xml">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="{{app_css}}">
-<script src="{{site_js}}"></script>
-<script src="{{fixi_js}}" defer></script>
+<link rel="stylesheet" href="/assets/app.css">
+<script src="/assets/site.js"></script>
+<script src="/assets/fixi.js" defer></script>
 </head>
 <body fx-action="/" fx-trigger="site:navigate" fx-target="#main">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="container header-bar">
-    <a class="brand" href="/">Alexander Morgan</a>
+    <h1 class="brand"><a href="/">Alexander Morgan</a></h1>
     <nav class="site-nav" aria-label="Main">
       <ul class="nav-links">
-        <li><a href="/projects"{{current_projects}}>Projects</a></li>
-        <li><a href="/publications"{{current_publications}}>Publications</a></li>
-        <li><a href="/blog"{{current_blog}}>Blog</a></li>
-        <li><a href="/recommendations"{{current_recommendations}}>Recommendations</a></li>
-        <li><a href="/cv"{{current_cv}}>CV</a></li>
+        <li><a href="/projects">Projects</a></li>
+        <li><a href="/publications">Publications</a></li>
+        <li><a href="/blog">Blog</a></li>
+        <li><a href="/recommendations">Recommendations</a></li>
+        <li><a href="/cv">CV</a></li>
       </ul>
     </nav>
     <label class="theme-toggle">
@@ -42,10 +42,10 @@
     </label>
   </div>
 </header>
-{{main}}
+<main id="main" class="container" tabindex="-1"></main>
 <footer class="site-footer">
   <div class="container footer-bar">
-    <p>© {{year}} Alexander Morgan</p>
+    <p>© 2026 Alexander Morgan</p>
     <nav aria-label="Elsewhere">
       <ul class="footer-links">
         <li><a href="https://x.com/lexandermorgan" target="_blank" rel="noopener">Twitter</a></li>

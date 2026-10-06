@@ -12,4 +12,4 @@ vendored here, ported from Tailwind `@apply` rules to plain CSS on the variables
 
 Markup and class/attribute conventions match Basecoat's docs (`.btn[data-variant]`, `.card`,
 `input.switch[role=switch]`). To add a component, port its rules from
-`basecoat-css/dist/components/<name>.css`, then add the file to `CSS_FILES` in `scripts/assets.ts`.
+`basecoat-css/dist/components/<name>.css`, then add the file to `CSS_FILES` in `scripts/site.ts`.

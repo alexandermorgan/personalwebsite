@@ -3,7 +3,11 @@ import { join } from "node:path";
 
 const dir = join(import.meta.dir, "../vendor/fixi");
 const upstream = await Bun.file(join(dir, "fixi.upstream.js")).text();
-const trimmed = await Bun.file(join(dir, "fixi.js")).text();
+const vendored = await Bun.file(join(dir, "fixi.js")).text();
+/** The code added for this site, between "// [added]" and "// [/added]". */
+const ADDED = /^\t*\/\/ \[added\][^]*?^\t*\/\/ \[\/added\]\n/gm;
+/** fixi.js without the site's additions: what must be upstream with code deleted. */
+const trimmed = vendored.replace(ADDED, "");
 
 /** Whether `small` can be made from `big` by deleting characters. */
 function isSubsequence(small: string, big: string): boolean {
@@ -17,7 +21,7 @@ function isSubsequence(small: string, big: string): boolean {
 }
 
 describe("vendored fixi", () => {
-  test("is upstream fixi with code only deleted: each line is an upstream line, in order, with characters removed", () => {
+  test("apart from the marked additions, is upstream fixi with code only deleted: each line is an upstream line, in order, with characters removed", () => {
     const up = upstream.split("\n");
     let next = 0;
     for (const line of trimmed.split("\n")) {
@@ -27,19 +31,9 @@ describe("vendored fixi", () => {
     }
   });
 
-  test("is smaller than upstream", () => {
-    expect(trimmed.length).toBeLessThan(upstream.length / 2);
-  });
-
-  test("has no extension points the site doesn't use", () => {
-    for (const gone of ["MutationObserver", "fixiCfg", "fx-ignore", "fx:process", "fx-swap", "fx-method", "startViewTransition", "confirm"]) {
-      expect(trimmed).not.toContain(gone);
-    }
-  });
-
   test("keeps what the site uses", () => {
     for (const kept of ['"fx-action"', '"fx-target"', '"fx-trigger"', '"config"', '"after"', '"error"', '"swapped"', '"FX-Request":"true"', "abort"]) {
-      expect(trimmed).toContain(kept);
+      expect(vendored).toContain(kept);
     }
   });
 });

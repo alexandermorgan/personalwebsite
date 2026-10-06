@@ -1,7 +1,8 @@
 // Loaded render-blocking in <head> (it is tiny and cached forever), so the saved
 // theme applies before first paint. It also runs in-page navigation: same-site
-// link clicks and back/forward ask fixi (on <body>, see pages/layout.html) to
-// fetch the new page's <main> and swap it in, leaving the header and footer alone.
+// link clicks and back/forward ask fixi (on <body>, see pages/_layout.html) to
+// fetch the new page and swap it into <main>, leaving the header and footer alone.
+// fixi itself puts the page's <title> and description into <head>.
 (() => {
   const root = document.documentElement;
 
@@ -126,8 +127,8 @@
 
   document.addEventListener("fx:after", (evt) => {
     const { cfg } = evt.detail;
-    // Anything but a page's <main> (a server error, say) is left to the browser.
-    if (!cfg.text.startsWith('<main id="main"')) {
+    // Anything but a page, which starts with its <title> (a server error, say), is left to the browser.
+    if (!cfg.text.startsWith("<title>")) {
       evt.preventDefault();
       fullLoad(cfg);
     }
@@ -147,7 +148,6 @@
     shown = here();
 
     const main = document.getElementById("main");
-    document.title = main.dataset.title;
     for (const a of document.querySelectorAll(".site-nav a")) {
       if (a.pathname === location.pathname) a.setAttribute("aria-current", "page");
       else if (location.pathname.startsWith(`${a.pathname}/`)) a.setAttribute("aria-current", "true");

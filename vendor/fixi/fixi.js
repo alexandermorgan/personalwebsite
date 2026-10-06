@@ -9,7 +9,6 @@
 				trigger:evt,
 				action:attr(elt, "fx-action"),
 				target:document.querySelector(attr(elt, "fx-target")),
-				swap:"outerHTML",
 				drop:reqs.size,
 				headers:{"FX-Request":"true"},
 				abort:ac.abort.bind(ac),
@@ -28,7 +27,18 @@
 			} finally {
 				reqs.delete(cfg)
 			}
-			cfg.target[cfg.swap] = cfg.text
+			// [added] Not in upstream fixi. The response is a page: its <title> and
+			// <meta name="description"> replace the document's, and the rest becomes the
+			// target's content.
+			let page = document.createElement("template")
+			page.innerHTML = cfg.text
+			for (let head of [...page.content.children].filter((e)=>e.matches('title, meta[name="description"]'))) {
+				if (head.matches("title")) document.title = head.textContent
+				else document.querySelector('meta[name="description"]').content = head.getAttribute("content")
+				head.remove()
+			}
+			cfg.target.replaceChildren(page.content)
+			// [/added]
 			send(elt, "swapped", {cfg})
 		}
 		elt.__fixi.evt = attr(elt, "fx-trigger")

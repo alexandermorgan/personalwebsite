@@ -1,17 +1,18 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
+import { SITE } from "../scripts/site";
 import { CSP } from "../src/http";
-import { call, ORIGIN, PAGES } from "./helpers";
+import worker from "../src/worker";
+import { call, ENV, PAGES } from "./helpers";
 
 describe("worker", () => {
   test("www redirects to the bare domain", async () => {
-    const { default: worker } = await import("../src/worker");
-    const res = await worker.fetch(new Request("https://www.alexandermorgan.dev/blog?x=1"), {});
+    const res = await worker.fetch(new Request("https://www.alexandermorgan.dev/blog?x=1"), ENV);
     expect(res.status).toBe(301);
     expect(res.headers.get("location")).toBe("https://alexandermorgan.dev/blog?x=1");
   });
 
-  test("trailing slashes redirect to the canonical URL", async () => {
-    for (const [from, to] of [["/blog/", "/blog"], ["/publications/", "/publications"], ["/blog/building-this-site-with-fixi/", "/blog/building-this-site-with-fixi"]]) {
+  test("trailing slashes and /home redirect to the canonical URL", async () => {
+    for (const [from, to] of [["/blog/", "/blog"], ["/blog/some-post//", "/blog/some-post"], ["/home", "/"]]) {
       const res = await call(from!);
       expect(res.status).toBe(301);
       expect(res.headers.get("location")).toBe(to!);
@@ -34,15 +35,26 @@ describe("worker", () => {
     expect(head.status).toBe(200);
   });
 
+  test("files starting with _ are never URLs", async () => {
+    for (const path of ["/_layout", "/_not-found", "/_pages/home.html", "/blog/_x"]) {
+      expect((await call(path)).status).toBe(404);
+    }
+  });
+
   test("sitemap lists every page", async () => {
     const xml = await (await call("/sitemap.xml")).text();
-    for (const path of PAGES) expect(xml).toContain(`<loc>${ORIGIN}${path}</loc>`);
+    expect(xml.match(/<loc>/g)).toHaveLength(PAGES.length);
+    for (const path of PAGES) expect(xml).toContain(`<loc>${SITE}${path}</loc>`);
   });
 });
 
 describe("/cv.pdf", () => {
   let fetchSpy: ReturnType<typeof spyOn> | undefined;
   afterEach(() => fetchSpy?.mockRestore());
+
+  test("is missing until CV_URL is set", async () => {
+    expect((await call("/cv.pdf")).status).toBe(404);
+  });
 
   test("streams the PDF from CV_URL, embeddable only by this site", async () => {
     fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(new Response("%PDF-1.7", { headers: { "content-type": "binary/octet-stream" } }));

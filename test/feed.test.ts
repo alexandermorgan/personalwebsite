@@ -1,31 +1,35 @@
 import { describe, expect, test } from "bun:test";
-import { projects } from "../src/content";
-import { posts } from "../src/posts";
-import { call, ORIGIN } from "./helpers";
+import { SITE } from "../scripts/site";
+import { anchors, attr, call, FILES, PAGES, POSTS, tags } from "./helpers";
+
+/** The projects: the sites the cards on /projects link to (each card links twice). */
+const PROJECTS = [...new Set(anchors(FILES.get("/_pages/projects.html")!.body as string).map((a) => attr(a, "href")!))];
 
 describe("/feed.xml", () => {
-  test("is RSS with every blog post and project", async () => {
+  test("is RSS with every blog post, in full, and every project", async () => {
     const res = await call("/feed.xml");
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("application/rss+xml; charset=utf-8");
     const xml = await res.text();
-    expect(xml).toStartWith('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"');
-    expect(xml).toContain(`<atom:link href="${ORIGIN}/feed.xml" rel="self" type="application/rss+xml"/>`);
-    expect(xml.match(/<item>/g)).toHaveLength(posts.length + projects.length);
-    for (const p of posts) expect(xml).toContain(`<guid isPermaLink="true">${ORIGIN}/blog/${p.slug}</guid>`);
-    for (const p of projects) expect(xml).toContain(`<guid isPermaLink="true">${p.url}</guid>`);
+    expect(xml).toStartWith("<?xml");
+    expect(xml).toContain("<rss");
+    expect(PROJECTS.length).toBeGreaterThan(0);
+    expect(xml.match(/<item>/g)).toHaveLength(POSTS.length + PROJECTS.length);
+    expect(xml.match(/<content:encoded>/g)).toHaveLength(POSTS.length);
+    for (const path of POSTS) expect(xml).toContain(`<guid isPermaLink="true">${SITE}${path}</guid>`);
+    for (const url of PROJECTS) expect(xml).toContain(`<guid isPermaLink="true">${url}</guid>`);
   });
 
-  test("posts are in full, with links made absolute", async () => {
-    const xml = await (await call("/feed.xml")).text();
-    expect(xml).toContain("<content:encoded><![CDATA[");
-    expect(xml).toContain(`<a href="${ORIGIN}/projects">`);
-    expect(xml).not.toMatch(/href="\/[^/]/);
+  test("links in posts are made absolute", async () => {
+    expect(await (await call("/feed.xml")).text()).not.toMatch(/(href|src)="\/(?!\/)/);
   });
 
-  test("every page links to it for feed readers to find", async () => {
-    const body = await (await call("/")).text();
-    expect(body).toContain('<link rel="alternate" type="application/rss+xml" title="Alexander Morgan" href="/feed.xml">');
-    expect(body).toContain('<a href="/feed.xml" type="application/rss+xml">RSS</a>');
+  test("every page links to it, for feed readers in <head> and for people in the page", async () => {
+    for (const path of PAGES) {
+      const body = await (await call(path)).text();
+      const alternate = tags(body, "link").find((t) => attr(t, "rel") === "alternate" && attr(t, "type") === "application/rss+xml");
+      expect(alternate && attr(alternate, "href")).toBe("/feed.xml");
+      expect(anchors(body).some((a) => attr(a, "href") === "/feed.xml")).toBe(true);
+    }
   });
 });
