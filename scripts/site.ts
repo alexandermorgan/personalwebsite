@@ -80,7 +80,7 @@ export async function site({ hashed = false } = {}): Promise<Map<string, File>> 
 
   const paths = [...pages.keys()].filter((name) => !name.split("/").some((part) => part.startsWith("_")));
   files.set("/feed.xml", { body: await feed(posts, await readProjects(pages.get("projects")!)), type: "application/rss+xml; charset=utf-8" });
-  files.set("/sitemap.xml", { body: sitemap(paths.map((name) => (name === "home" ? "/" : `/${name}`))), type: "application/xml; charset=utf-8" });
+  files.set("/sitemap.xml", { body: sitemap(paths.map((name) => (name === "index" ? "/" : `/${name}`))), type: "application/xml; charset=utf-8" });
   return files;
 }
 
@@ -142,7 +142,7 @@ async function readPosts(pages: Map<string, string>): Promise<Post[]> {
         })
         // The feed gets the article without the page's head or the post's header.
         .on("title, meta, article > header", { element: (e) => void e.remove() })
-        .on("article, article > div", { element: (e) => void e.removeAndKeepContent() }),
+        .on("article, article > section", { element: (e) => void e.removeAndKeepContent() }),
     );
     if (!/^\d{4}-\d{2}-\d{2}$/.test(post.date)) throw new Error(`pages/${name}.html: no <time datetime="YYYY-MM-DD">`);
     posts.push({ ...post, body: post.body.trim() });

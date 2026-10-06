@@ -11,8 +11,8 @@ describe("worker", () => {
     expect(res.headers.get("location")).toBe("https://alexandermorgan.dev/blog?x=1");
   });
 
-  test("trailing slashes and /home redirect to the canonical URL", async () => {
-    for (const [from, to] of [["/blog/", "/blog"], ["/blog/some-post//", "/blog/some-post"], ["/home", "/"]]) {
+  test("trailing slashes and /index redirect to the canonical URL", async () => {
+    for (const [from, to] of [["/blog/", "/blog"], ["/blog/some-post//", "/blog/some-post"], ["/index", "/"]]) {
       const res = await call(from!);
       expect(res.status).toBe(301);
       expect(res.headers.get("location")).toBe(to!);
@@ -36,7 +36,7 @@ describe("worker", () => {
   });
 
   test("files starting with _ are never URLs", async () => {
-    for (const path of ["/_layout", "/_not-found", "/_pages/home.html", "/blog/_x"]) {
+    for (const path of ["/_layout", "/_not-found", "/_pages/index.html", "/blog/_x"]) {
       expect((await call(path)).status).toBe(404);
     }
   });

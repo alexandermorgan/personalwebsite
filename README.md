@@ -86,7 +86,7 @@ page. The footer links to Twitter, GitHub, LinkedIn, Google Scholar and the RSS 
 Only the Basecoat components in use are vendored into `vendor/basecoat/`, as plain CSS on those tokens.
 `scripts/site.ts` concatenates everything into one `app.css`.
 
-**HTML.** Every page is an `.html` file in `pages/`, at the path of its URL (`/` is `home.html`), with all of
+**HTML.** Every page is an `.html` file in `pages/`, at the path of its URL (`/` is `index.html`), with all of
 its content written out. `pages/_layout.html` is the document around them; files starting with `_` are never
 URLs. The worker puts a page into the layout with `HTMLRewriter` (its title, description and canonical and
 Open Graph tags in `<head>`, its content in `<main>`, `aria-current` on the navbar), and there is no
@@ -110,7 +110,7 @@ bun run preview    # builds and runs wrangler dev
 
 | To change | Edit |
 | --- | --- |
-| The home page | `pages/home.html` |
+| The home page | `pages/index.html` |
 | Projects, publications, recommendations | `pages/projects.html`, `pages/publications.html`, `pages/recommendations.html` |
 | Blog posts | Add or edit `pages/blog/<slug>.html` |
 | A new page | Add `pages/<name>.html` (and a navbar link in `pages/_layout.html`) |

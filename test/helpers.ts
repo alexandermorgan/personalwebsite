@@ -21,11 +21,11 @@ export function call(path: string, opts: CallOptions = {}): Promise<Response> {
   return worker.fetch(new Request(ORIGIN + path, { method: opts.method ?? "GET", headers }), { ...ENV, ...opts.env });
 }
 
-/** Every page's URL, from the page files: /_pages/blog/x.html is /blog/x, home.html is /. */
+/** Every page's URL, from the page files: /_pages/blog/x.html is /blog/x, index.html is /. */
 export const PAGES = [...FILES.keys()]
   .filter((path) => path.startsWith("/_pages/") && !path.includes("/_", "/_pages".length))
   .map((path) => path.slice("/_pages".length, -".html".length))
-  .map((path) => (path === "/home" ? "/" : path));
+  .map((path) => (path === "/index" ? "/" : path));
 
 /** The blog posts' URLs. */
 export const POSTS = PAGES.filter((path) => path.startsWith("/blog/"));

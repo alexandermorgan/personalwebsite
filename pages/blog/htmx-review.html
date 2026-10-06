@@ -1,0 +1,58 @@
+<title>htmx review · Alexander Morgan</title>
+<meta name="description" content="htmx is a lifeline of simplicity to a web ecosystem swamped in complexity. Its three core strengths, and the one place it stops just shy of HATEOAS.">
+<article class="post narrow centered">
+  <header class="post-header">
+    <p class="muted"><a href="/blog">← All posts</a></p>
+    <h1>htmx review</h1>
+    <p class="muted"><time datetime="2025-02-17">February 17, 2025</time></p>
+  </header>
+  <section class="prose">
+    <p>htmx is a lifeline of simplicity to a web ecosystem swamped in complexity. It’s genuinely refreshing to build websites primarily with html bolstered by some extra attributes and events. There’s an elegance to the fact that an approach so plain leaves you questioning the path web development has been breathlessly forging in the past 20 years. With one minor caveat, htmx really delivers with three core strengths:</p>
+    <ul>
+      <li><strong>Simple:</strong> htmx is a simple system that extends a language you already know (html) with familiar patterns and syntax.</li>
+      <li><strong>Rewarding:</strong> Using it feels like advocating for the improvement of the core of the internet.</li>
+      <li><strong>Practical:</strong> It's easier and faster to get a website going or a new page added.</li>
+    </ul>
+    <p>As for that one shortcoming, it’s that htmx stops just shy of fully embracing the concept of Hypermedia As The Engine Of Application State (HATEOAS). Let's examine these three strengths and one weakness in more detail.</p>
+
+    <h2>Simple</h2>
+    <p>There’s a reason the htmx community is fond of the <a href="https://swag.htmx.org/en-usd/products/grug-complexity-bad-shirt" target="_blank" rel="noopener">Grug meme</a>. The library is for web developers looking to escape callback hell. When I built <a href="https://ecorate.eco/" target="_blank" rel="noopener">my first website</a> I didn’t know much about web development so I looked around and React seemed to be the modern way to build a Single Page Application (SPA). Surely a SPA was in fact what I needed, right?</p>
+    <p>It was the wrong tool for the job, but React did work. With time and lots of tutorials I was able to overcome most of the problems inflicted by my terrible tech-stack decision. For example, I implemented code-splitting to break up the front-loaded bloat inherent to the SPA architecture.<br>But I was never able to get useEffect quite right.<br>But I was never able to get useEffect quite right.</p>
+    <p>It helps to keep in mind that React was made for Facebook and Instagram which build out different content for each user. If you’re building something as complex as those websites, React stands a good chance of being a great fit. For my first website as a solo dev on a simple project, I blundered this tech-stack choice.</p>
+    <p>The real advantage of htmx’s simplicity has nothing to do with performance or bundle size (both of which are solid). It’s that the thrust of the whole system fits easily in my head. htmx lets any html element make any of the five http request types, coordinated using web-standard syntax, and driven by events. If I need something that isn’t possible with that small set of tools, I have to <s>reach for something more complex</s> rethink my approach.</p>
+
+    <h2>Rewarding</h2>
+    <p>It feels great to contribute to improving the web ecosystem. In this case, my “contribution” is voting with my feet and building stuff with htmx. One aspect of web development where htmx is part of a positive general trend is the revalorization of Server Side Rendering (SSR). Lots of frontend frameworks like React and Svelte have been leaning more and more heavily on SSR in recent years; for hypermedia-driven solutions, SSR has always been baked in.</p>
+    <p>It goes way beyond SSR though. For the creators of htmx, the best possible outcome would be for the library to become obsolete by having its core capabilities integrated into html. That's why the website is a .org and they actively promote other similar libraries. The mission is promoting hypermedia, so it doesn’t really matter if that’s through htmx or some <a href="https://htmx.org/essays/alternatives/" target="_blank" rel="noopener">other library</a>.</p>
+    <p>Jarred Sumner <a href="https://x.com/jarredsumner/status/1850542604188037248" target="_blank" rel="noopener">tweeted</a> that "Programming languages are social movements...". The future of the web is still undecided, and how developers engage with it is a large part of how things will progress. That's why using htmx feels rewarding.</p>
+
+    <h2>Practical</h2>
+    <p>Adding htmx doesn’t involve some build step or complex setup; a one-liner in your head element collects the dependency-free library from a CDN. If you do have to integrate a frontend framework, you can even still use htmx with that. Decide to change the backend programming language? Your <a href="https://htmx.org/essays/hypermedia-on-whatever-youd-like/" target="_blank" rel="noopener">HOWL</a> stack (Htmx On Whatever you'd Like) won't mind as long as you respond to its requests with html.</p>
+    <p>I recently made an online word game called <a href="https://eightile.com/" target="_blank" rel="noopener">Eightile</a>. When I was building it I wanted to try using a startup's pure python frontend framework. Their docs were pretty good and I’m a python developer, so that setup would surely be easier for me, right? It turns out shoehorning html, css, and javascript into python functions is way more trouble than it’s worth. I was able to get it to work locally, but since the build was so complicated the only place I could host it was the framework startup’s own hosting service 🙃 This analysis by Pieter Levels describes the situation to the letter.</p>
+    <figure class="video">
+      <a href="https://www.youtube.com/watch?v=oFtjKbXKqbg&amp;t=2613s" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/oFtjKbXKqbg/maxresdefault.jpg" alt="Watch Pieter Levels on the Lex Fridman Podcast on YouTube, from 43:33" width="1280" height="720" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+      </a>
+      <figcaption>Pieter Levels on the Lex Fridman Podcast #440, from <time datetime="PT43M33S">43:33</time></figcaption>
+    </figure>
+    <p>So instead I built the game with Svelte which is a much better fit for the project. But I still had a hard time understanding how/if things were using SSR, how/when the code was compiled, why I had to conform to a folder-based routing system, etc.</p>
+    <p>In retrospect, I’ve gradually been moving towards just html and css as much as possible. htmx is a great way to get that tech stack without compromising on functionality.</p>
+
+    <h2>HATEOAS</h2>
+    <p>So what about that minor downside? There’s this idea that a proper hypermedia app should use Hypermedia As The Engine Of Application State (HATEOAS). Great concept, terrible acronym. The concept has been around in one form or another for decades, but the term was neatly presented in Roy Fielding’s dissertation. htmx claims to be all in on HATEOAS, but there’s one case where it falls short on this promise: local requests.</p>
+    <p>By local requests, I mean cases where the hypermedia elements you want are already in your document and you want to move them around in some way. If hypermedia is truly the engine of your application state, you should be able to make requests directly via css selectors in addition to routes. Imagine if starting your request location with a “#” or “.” targeted the relevant elements in the current document, unlocking these kinds of hypermedia interactions:</p>
+    <ul>
+      <li><strong>hx-get:</strong> get the element(s) from the document, send them to the hx-target</li>
+      <li><strong>hx-post:</strong> send the hx-target to the specified element(s)</li>
+      <li><strong>hx-put and hx-patch:</strong> trade places of the specified element(s) and the hx-target</li>
+      <li><strong>hx-delete:</strong> remove the element(s) from the document</li>
+    </ul>
+    <p>The to-do list app possibilities are endless! This extension of html request syntax would afford elements more direct control over themselves. In a hypermedia application, arguably the most important aspect of application state is the disposition of the elements so this is critical.</p>
+    <p>In Roy Fielding’s dissertation he talks a lot about <a href="https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm" target="_blank" rel="noopener">client, server, and cache</a> setups in REST architectures. “An interesting observation is that the most efficient network request is one that doesn’t use the network.”. Here he’s referring to the cache, however, it applies even more so to local requests. Talk about Locality of Behavior! When defining resources in the same chapter, Fielding explains that “Any information that can be named can be a resource”. That definition applies equally well to elements already in the document.</p>
+    <p>Games are a great use case for this. Html should be able to drive moving, capturing, and promoting pieces on a hypermedia chess board. Going back to my word game with letter tiles, why can't I swap the location of two letters with a local request triggered by a drag-and-drop event? Of course that’s easy to do with a little bit of javascript, but the idea is to have a hypermedia-driven app. A lot of these element-based state changes are the kinds of things that don’t require server requests and that you wouldn’t redirect to a new url for. But they’re still critical changes to the application state. I wrote the game using Svelte because this level of hypermedia control is missing. Svelte is a wonderful framework but to move a tile I have to move an object that represents the letter tile from its array of objects to another array, and overwrite both the arrays of tiles so that the state update registers. It’s fine and it works, but even writing it out is exhausting.</p>
+    <p>I've been saying that this is a <em>minor</em> shortcoming because it's addressable with a minor version change to htmx. Of course, that's unlikely to happen because of htmx’s “<a href="https://htmx.org/essays/future/#no-new-features-as-a-feature" target="_blank" rel="noopener">no new features as a feature</a>” policy. That's a solid strategy in general, but this case is different. HATEOAS-maxxing is already a core priority of the library, not some unrelated new feature. But with the hx-preserve attribute, the authors supported the new and related moveBefore API since its debut in Chrome, so perhaps there's a chance. An htmx extension is another option. Katrina Grace made the <a href="https://github.com/kgscialdone/htmx-template" target="_blank" rel="noopener">HTMX Template Extension</a> which is the closest match, but ideally this would be in the core library itself and use css syntax.</p>
+
+    <h2>Conclusion</h2>
+    <p>Everytime I build a new website I find myself wanting a simpler setup. I’m grateful to the hypermedia evangelists who helped me realize that means starting with html, css, and htmx. It’s taken me an embarrassingly long time to come to this dead-simple approach. I hope it becomes more mainstream.</p>
+  </section>
+</article>

@@ -20,7 +20,13 @@ kept as data in TypeScript or JSON to be turned into markup. A project card, a p
 about me is written out as HTML in the page that shows it. A list of three things is three `<li>`s in the
 file, not a loop.
 
-**One file per URL.** `/projects` is `pages/projects.html`, `/` is `pages/home.html`, and the post
+**The HTML is semantic.** Use the element that says what the content is: `<article>` for a post or card,
+`<section>` for a part of one (a post's body is `<section class="prose">`), `<header>`/`<footer>`, `<nav>`,
+`<ul>`/`<ol>` for lists, `<time datetime>` for dates, `<details>`/`<summary>` for disclosure, `<a>` for
+navigation and `<button>` for actions. Reach for `<div>` or `<span>` only for styling hooks with no meaning
+of their own, and use classes for styling, not to stand in for the right element.
+
+**One file per URL.** `/projects` is `pages/projects.html`, `/` is `pages/index.html`, and the post
 `/blog/<slug>` is `pages/blog/<slug>.html`. There is no list of pages or routes anywhere: the build puts
 the page files in the static assets under `/_pages/`, and the worker reads the one that matches the URL.
 Files whose names start with `_` are never URLs (a request for any path with a segment starting with `_` is
@@ -52,7 +58,9 @@ layout's canonical link and Open Graph/Twitter tags are filled from the page's t
 
 A blog post's file is the same, with its summary as the description and its content an `<article>` with the
 title in `<h1>` and the date in `<time datetime="YYYY-MM-DD">`. Those three are what the blog index, the feed
-and the sitemap read from it.
+and the sitemap read from it. Footnotes go in a `<footer class="footnotes">` after the post's
+`<section class="prose">`, as an `<ol>` linked both ways with `<sup>` numbers in the text (see
+`pages/blog/open-letter-to-mayor-mamdani.html`).
 
 ## One URL, two responses
 
@@ -109,9 +117,9 @@ post's `<h1>`, description and `<time datetime>`, newest first, and each project
 
 - fills `#posts` in `pages/blog.html` with one `pages/_post-item.html` per post, using `HTMLRewriter`
   (its `data-post` elements get the link, date and summary),
-- writes `feed.xml` (each post's `<article>` without its `<header>`, links made absolute, then each project
-  linking to the project itself) and `sitemap.xml` as static files. That XML is the only markup written in
-  code.
+- writes `feed.xml` (each post's `<article>` without its `<header>` or `<section>` wrapper, links made
+  absolute, then each project linking to the project itself) and `sitemap.xml` as static files. That XML is
+  the only markup written in code.
 
 Nothing generated is committed, and there is no git hook: `bun run dev` and the tests run the same
 `scripts/site.ts`, so they always see the current folders.

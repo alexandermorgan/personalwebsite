@@ -230,6 +230,86 @@ main:focus-visible {
   font-family: var(--font-mono);
   font-size: 0.9em;
 }
+.prose blockquote {
+  padding-inline-start: var(--space-4);
+  border-inline-start: 3px solid var(--border);
+  color: var(--muted-foreground);
+}
+/* A video as a thumbnail linking to it (the CSP frames nothing from other sites).
+   The box is a fixed 16:9, so the image can't shift the layout, and the play
+   button marks it as a video. */
+.video {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.video a {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+}
+.video img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.video a::after {
+  content: "▶";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: var(--space-12);
+  height: var(--space-12);
+  padding-inline-start: var(--space-1);
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--background) 75%, transparent);
+  color: var(--foreground);
+  font-size: var(--text-lg);
+  transition: background var(--transition);
+}
+.video a:hover::after {
+  background: var(--background);
+}
+.video figcaption {
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+}
+/* Footnotes: a post's <footer class="footnotes">, linked from <sup> numbers in the text. */
+.prose sup {
+  line-height: 0;
+}
+.footnotes {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+}
+.footnotes ol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-inline-start: var(--space-6);
+}
+/* Code blocks scroll sideways instead of wrapping, so indentation stays readable. */
+.prose pre {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  white-space: pre;
+  overflow-x: auto;
+}
+.prose pre code {
+  font-size: inherit;
+}
 .prose > .lede {
   color: var(--foreground);
 }

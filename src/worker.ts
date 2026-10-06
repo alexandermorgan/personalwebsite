@@ -1,5 +1,5 @@
 // Every page is one file in pages/: /projects is pages/projects.html, / is
-// home.html and /blog/<slug> is blog/<slug>.html. Each starts with its <title>
+// index.html and /blog/<slug> is blog/<slug>.html. Each starts with its <title>
 // and <meta name="description">, then its content. The build puts the files in
 // the static assets under /_pages/, where the worker reads them.
 //
@@ -30,14 +30,14 @@ export default {
     const path = url.pathname;
     // One URL per page: /blog/ and /blog both work, but /blog is the real one.
     if (path.length > 1 && path.endsWith("/")) return withSecurityHeaders(redirect(path.replace(/\/+$/, "") + url.search));
-    if (path === "/home") return withSecurityHeaders(redirect("/" + url.search));
+    if (path === "/index") return withSecurityHeaders(redirect("/" + url.search));
     try {
       if (request.method !== "GET" && request.method !== "HEAD") {
         return withSecurityHeaders(new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD" } }));
       }
       if (path.split("/").some((segment) => segment.startsWith("_"))) return withSecurityHeaders(await notFound(request, env));
       if (path === "/cv.pdf") return withSecurityHeaders(await cvPdf(request, env));
-      const file = await readPage(env, url, path === "/" ? "home" : path.slice(1));
+      const file = await readPage(env, url, path === "/" ? "index" : path.slice(1));
       if (file !== null) return withSecurityHeaders(await respond(request, env, file));
       // Any other static file (feed.xml, robots.txt, ...). On Cloudflare these are
       // served before the worker runs; under Bun (dev, tests) they come through here.

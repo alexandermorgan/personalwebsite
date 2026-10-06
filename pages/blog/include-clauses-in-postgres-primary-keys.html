@@ -1,0 +1,61 @@
+<title>INCLUDE Clauses in Postgres Primary Keys · Alexander Morgan</title>
+<meta name="description" content="Query optimization using INCLUDE clauses in postgres primary keys.">
+<article class="post narrow centered">
+  <header class="post-header">
+    <p class="muted"><a href="/blog">← All posts</a></p>
+    <h1>INCLUDE Clauses in Postgres Primary Keys</h1>
+    <p class="muted"><time datetime="2025-11-17">November 17, 2025</time></p>
+  </header>
+  <section class="prose">
+    <p>We often refer to query optimization when trying to improve the performance of Postgres queries. For a single query, this usually amounts to adjusting the query itself, the indexes used, or both. But "query" optimization suggests that decisions made for one query don't impact the system as a whole. I prefer a table-centric mentality because it encourages us to think of the set of queries on a given table and its indexes as a tightly-knit system. Since "table optimization" isn't very catchy, I think of this as one small aspect of CDD, that is, "Cheapskate Driven Development". Rather than dive into a manifesto about elegance and minimalism, here I'll explain how to get a fine-tuned Postgres index practically for free (i.e. low storage and <code>INSERT</code>/<code>UPDATE</code> runtime costs).</p>
+
+    <h2>Covering Indexes</h2>
+    <p>The first piece of the solution requires understanding what a "covering index" is. An index is "covering" for a given query if all of the columns needed from that table to satisfy the query are in the index itself. This is not just the <code>SELECT</code> clause; it also includes any columns referenced in <code>JOIN</code> statements, <code>WHERE</code> clauses, etc. Having those columns in the index itself means Postgres doesn't need to consult the table at all to satisfy the query. Indexes usually work by associating the indexing-logic columns of the index to the row numbers in the full table where the rest of the data can be found. That means that you usually have one level of indirection: you quickly find the value you're looking for in the index, but that only tells you which row number to go look for the data in the actual table. The critical thing to understand is that the index is a completely separate data structure from the table, so it takes some time to hop between the row number you found in the index, and the data you want from that row in the table.</p>
+    <p>The "covering" quality of an index is query-specific because different queries will draw on different sets of columns from the same table. Imagine a "transit" schema with an "airport" table where we add an index on the 3-letter <code>airport_code</code> column.</p>
+<pre><code>CREATE INDEX airport_code_idx ON transit.airport (airport_code);</code></pre>
+    <p>If you wanted to find all the <code>airport_code</code> values that start with a "B", the <code>airport_code_idx</code> has you covered!</p>
+<pre><code>SELECT airport_code
+FROM transit.airport
+WHERE airport_code LIKE 'B%';</code></pre>
+    <p>You can check that the index is covering for this query by running it with <code>EXPLAIN ANALYZE</code> prepended. You'll see the "<code>airport_code_idx</code>" index referenced as an "<code>Index-only Scan</code>", nice! But that's not a very useful query. What if you had a travel website and you need to get the city associated with a given <code>airport_code</code>?</p>
+<pre><code>SELECT city
+FROM transit.airport
+WHERE airport_code = 'BCN';</code></pre>
+    <p>You'll get the right answer, 'Barcelona', and the <code>airport_code_idx</code> will still be used. But if you inspect further with <code>EXPLAIN ANALYZE</code> you'll see that it's via a regular "<code>Index Scan</code>". That means that we still have to get the row number for the data from the index, and then go to that row in the table to get the city name. No big deal if you're looking up one value. But what if your travel website handles tons of flight queries and each one shows users the city names? In that case it might be worth it to put more information directly in your index.</p>
+
+    <h2>INCLUDE Clauses</h2>
+    <p>Sometimes you have an index that already has the right indexing-logic for your needs, but you want to make it even more fine-tuned for your heavy-use cases. By adding <code>INCLUDE (city)</code>, you put a copy of the city value at each entry in the index we made. Just tack it on to the end of the index-creation statement. Easy!</p>
+<pre><code>CREATE INDEX airport_code_incl_city_idx ON transit.airport (airport_code) INCLUDE (city);</code></pre>
+    <p>This would be a covering index for our last query which is nice if it's a query you do a lot. You can even <code>INCLUDE</code> multiple columns by comma-separating them. But how much does this cost? At first glance it looks like this would take up twice as much space since you went from one text column to two. However, there's a fair amount of overhead to creating an index at all. Since an index is an independent data structure, you have to store a copy of the indexing-logic columns. The leaf nodes of a B-tree index link to the previous and next values, so you'll also need two pointers per leaf node. Then you have to add the table row number associated with the index entry. Not to mention a bit more footprint for the actual B-tree hierarchy. In all, a simple 1-column B-tree index will take up ~5-6 columns-worth of space. That's fine. It's worth it to trade a bit of disk space for an exponential improvement in querying speed. When we add a column to an index with <code>INCLUDE</code>, it doesn't actually change any of the indexing logic. So the storage cost is only one more column's worth of space. For a ~15% increase in the storage footprint of your index, you can get a solid performance improvement if that's the difference between your index being covering or not for some heavy/frequent queries.</p>
+
+    <h2>Cheapskate Driven Development</h2>
+    <p>If that small storage cost sounds like it's worth the performance improvement, you should review the sets of queries you have on each table and see which indexes you already have that might benefit from one or two included columns. But there's a catch: a lot of your most heavily-used queries are probably your table primary keys and you can't add an <code>INCLUDE</code> clause to an existing index. You can of course have a duplicate index that has the same indexing logic as the primary key, but adds the <code>INCLUDE</code> statement. But then those indexes consume more than twice as much disk space as before. Also, every <code>INSERT</code> or <code>UPDATE</code> operation on the table will be a little slower because now there's an extra index to update as part of those operations. These trade-offs might still be worth it for your use case, but they don't sit well with my Cheapskate Driven Development ethos.</p>
+    <p>To get the minimal storage footprint we can create the duplicate index with the <code>INCLUDE</code> statement, then inside of a transaction delete the primary key and promote the new index to primary-key status. We create the new index before entering the transaction so that the blocking transaction doesn't take any considerable amount of time. Here we'll also assume the pre-existing index is the primary key.</p>
+<pre><code>CREATE INDEX IF NOT EXISTS airport_code_incl_city_idx ON transit.airport (airport_code) INCLUDE (city);
+BEGIN;
+    ALTER TABLE transit.airport DROP CONSTRAINT airport_pkey;
+    -- the next line usually isn't necessary but it depends
+    -- on how the primary key index was made
+    ALTER TABLE transit.airport DROP INDEX IF EXISTS airport_pkey;
+    ALTER TABLE transit.airport ADD PRIMARY KEY USING INDEX airport_code_incl_city_idx;
+COMMIT;</code></pre>
+    <p>There's one more catch. You won't be able to delete the primary key if other tables reference it as a foreign key. So you need to remove all of those constraints before deleting the primary key, then add them all back to the index newly-promoted to primary key. Let's rework the previous example to deal with two foreign keys in the <code>transit.flight</code> table that both reference the <code>transit.airport.airport_code</code> column as a foreign key.</p>
+<pre><code>CREATE INDEX IF NOT EXISTS airport_code_incl_city_idx ON transit.airport (airport_code) INCLUDE (city);
+BEGIN;
+    ALTER TABLE transit.flight DROP CONSTRAINT origin_airport_fk;
+    ALTER TABLE transit.flight DROP CONSTRAINT departure_airport_fk;
+    ALTER TABLE transit.airport DROP CONSTRAINT airport_pkey;
+    ALTER TABLE transit.airport DROP INDEX IF EXISTS airport_pkey;
+    ALTER TABLE transit.airport ADD PRIMARY KEY USING INDEX
+        airport_code_incl_city_idx;
+    ALTER TABLE transit.flight ADD CONSTRAINT origin_airport_fk
+        FOREIGN KEY (origin_airport)
+        REFERENCES transit.airport(airport_code);
+    ALTER TABLE transit.flight ADD CONSTRAINT departure_airport_fk
+        FOREIGN KEY (departure_airport)
+        REFERENCES transit.airport(airport_code);
+COMMIT;</code></pre>
+    <p>The end result is a highly performant index at a minimal additional storage cost. If you've made it this far you're officially a card-carrying cheapskate developer!</p>
+    <p>(This blog post was originally shared on LinkedIn <a href="https://www.linkedin.com/feed/update/urn:li:activity:7396075910833143809/" target="_blank" rel="noopener">here</a>.)</p>
+  </section>
+</article>
