@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "check": "tsc --noEmit && bun test",
     "preview": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "prepare": "git config core.hooksPath .githooks || true"
   },
   "devDependencies": {
     "@types/bun": "1.4.2",

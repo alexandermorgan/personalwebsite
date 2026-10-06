@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { join } from "node:path";
+import { blogIndex } from "../scripts/site";
 import { anchors, attr, call, ORIGIN, PAGES, POSTS, tags } from "./helpers";
 
 /** The <meta> or <link> start tag whose `key` attribute is `value`. */
@@ -40,6 +42,10 @@ describe("pages", () => {
         expect({ path, href, current: attr(a, "aria-current") }).toEqual({ path, href, current: expected });
       }
     }
+  });
+
+  test("pages/blog.html as committed lists every post (run bun scripts/blog-index.ts if not)", async () => {
+    expect(await Bun.file(join(import.meta.dir, "../pages/blog.html")).text()).toBe(await blogIndex());
   });
 
   test("the blog links to every post, newest first, each with its date", async () => {

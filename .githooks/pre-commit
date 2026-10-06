@@ -1,0 +1,5 @@
+#!/bin/sh
+# Keep pages/blog.html listing every post in pages/blog/ (see scripts/blog-index.ts),
+# and commit it along with the post. `bun install` points git at this folder
+# (the prepare script in package.json sets core.hooksPath).
+bun scripts/blog-index.ts && git add pages/blog.html

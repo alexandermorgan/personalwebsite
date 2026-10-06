@@ -68,8 +68,10 @@ instead. Publication cards instead show the title, then the venue and the origin
 
 **Blog.** A post is a file, `pages/blog/<slug>.html`, served at `/blog/<slug>`: its `<title>` and
 description (the summary), then an `<article>` with the title in `<h1>` and the date in
-`<time datetime="YYYY-MM-DD">`. The build reads those to list the posts, newest first, on `/blog` (one
-`pages/_post-item.html` each), in the feed and in the sitemap.
+`<time datetime="YYYY-MM-DD">`. Those list the posts, newest first, on `/blog` (one `pages/_post-item.html`
+each), in the feed and in the sitemap. The list in `pages/blog.html` is kept up to date in the file itself: a
+git pre-commit hook (`.githooks/pre-commit`, installed by `bun install`) and `bun run dev`, whenever
+`pages/blog/` changes, rewrite it, so adding a post is only adding its file.
 
 **CV.** Set `CV_URL` in `wrangler.jsonc` to the PDF's URL (e.g. its public R2 URL), and the worker serves it
 at `/cv.pdf`. `/cv` (`pages/cv.html`) says the CV is coming soon; once it's uploaded, change the page to link
@@ -121,7 +123,7 @@ bun run preview    # builds and runs wrangler dev
 
 | Script | What it does |
 | --- | --- |
-| `dev` | Develop locally on http://localhost:8787 under Bun. Restarts on code changes; pages, CSS and JS reload on refresh. |
+| `dev` | Develop locally on http://localhost:8787 under Bun. Restarts on code changes; pages, CSS and JS reload on refresh; keeps `pages/blog.html` listing every post. |
 | `preview` | Build and run the real Worker locally on workerd. |
 | `test` | Run the tests in [`test/`](test). |
 | `typecheck` | Check the TypeScript types. |
@@ -165,7 +167,8 @@ styles/         tokens, base and site CSS
 vendor/         the cut-down fixi.js and the Basecoat components in use
 public/         static files (_headers, favicon, robots.txt)
 client/         site.js: theme and in-place navigation (shipped as a hashed asset)
-scripts/        the static files (site.ts: pages, assets, blog index, feed, sitemap) and the build
+scripts/        the static files (site.ts: pages, assets, blog index, feed, sitemap), the build and blog-index.ts
+.githooks/      pre-commit: keeps pages/blog.html listing every post
 dev/            the Bun dev server (not shipped)
 test/           bun:test suites (not shipped)
 ```

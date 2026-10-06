@@ -121,8 +121,18 @@ post's `<h1>`, description and `<time datetime>`, newest first, and each project
   absolute, then each project linking to the project itself) and `sitemap.xml` as static files. That XML is
   the only markup written in code.
 
-Nothing generated is committed, and there is no git hook: `bun run dev` and the tests run the same
-`scripts/site.ts`, so they always see the current folders.
+The blog index is also kept up to date in `pages/blog.html` itself, so the committed file is the real
+page with every post listed. `updateBlogIndex()` in `scripts/site.ts` rewrites it when it's out of date,
+and runs from two places:
+
+- the git pre-commit hook, `.githooks/pre-commit` (`bun install` sets `core.hooksPath` to `.githooks`), which
+  runs `scripts/blog-index.ts` and stages `pages/blog.html` with the post, so every commit is in sync;
+- `bun run dev`, whenever a file in `pages/blog/` changes, so the file updates as you write.
+
+A test fails if the committed `pages/blog.html` is out of date, and the build fills the list the same way, so
+a deploy is right even if the hook was skipped. Don't edit the list in `pages/blog.html` by hand; edit
+`pages/_post-item.html` or the posts. The feed and sitemap aren't committed: `bun run dev` and the tests run
+the same `scripts/site.ts`, so they always see the current folders.
 
 ## Keeping it minimal
 
@@ -182,8 +192,8 @@ surrounding code. Accessibility comes from the HTML: real `<a>`, `<button>`, `<l
 
 - **A page:** create `pages/<name>.html`, starting from another page's file. It's live at `/<name>`. To put
   it in the navbar, add a link to `pages/_layout.html`.
-- **A blog post:** create `pages/blog/<slug>.html`. The blog index, feed and sitemap pick it up on the next
-  build (or right away under `bun run dev`).
+- **A blog post:** create `pages/blog/<slug>.html`. `pages/blog.html` lists it as soon as you save it under
+  `bun run dev`, or when you commit; the feed and sitemap pick it up on the next build.
 - **A project:** add its card to `pages/projects.html`, copying another card. The feed picks it up the same way.
 
 ## Checklist for a change

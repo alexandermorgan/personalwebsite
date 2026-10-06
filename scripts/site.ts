@@ -10,7 +10,9 @@
 //   everything in public/
 //
 // Lists come from the folders: adding pages/blog/<slug>.html adds the post to
-// the blog index, the feed and the sitemap.
+// the blog index, the feed and the sitemap. The blog index is also kept up to
+// date in pages/blog.html itself (see updateBlogIndex()), so the committed file
+// lists every post.
 
 import { join } from "node:path";
 
@@ -69,10 +71,7 @@ export async function site({ hashed = false } = {}): Promise<Map<string, File>> 
     files.set(url, asset);
   }
 
-  const pages = new Map<string, string>();
-  for (const path of [...new Bun.Glob("**/*.html").scanSync({ cwd: PAGES })].sort()) {
-    pages.set(path.slice(0, -".html".length), await Bun.file(join(PAGES, path)).text());
-  }
+  const pages = await readPages();
   const posts = await readPosts(pages);
   pages.set("_layout", await pointAtAssets(pages.get("_layout")!, urls));
   pages.set("blog", await listPosts(pages.get("blog")!, pages.get("_post-item")!, posts));
@@ -82,6 +81,34 @@ export async function site({ hashed = false } = {}): Promise<Map<string, File>> 
   files.set("/feed.xml", { body: await feed(posts, await readProjects(pages.get("projects")!)), type: "application/rss+xml; charset=utf-8" });
   files.set("/sitemap.xml", { body: sitemap(paths.map((name) => (name === "index" ? "/" : `/${name}`))), type: "application/xml; charset=utf-8" });
   return files;
+}
+
+/** pages/blog.html with its list of posts up to date, as it should be on disk. */
+export async function blogIndex(): Promise<string> {
+  const pages = await readPages();
+  return listPosts(pages.get("blog")!, pages.get("_post-item")!, await readPosts(pages));
+}
+
+/**
+ * Rewrites pages/blog.html if its list of posts is out of date, and says whether
+ * it did. The pre-commit hook (.githooks/pre-commit, via scripts/blog-index.ts)
+ * and the dev server, whenever pages/blog/ changes, run it.
+ */
+export async function updateBlogIndex(): Promise<boolean> {
+  const file = Bun.file(join(PAGES, "blog.html"));
+  const html = await blogIndex();
+  if (html === (await file.text())) return false;
+  await Bun.write(file, html);
+  return true;
+}
+
+/** Every page file, by name ("index", "blog/<slug>", "_layout", ...). */
+async function readPages(): Promise<Map<string, string>> {
+  const pages = new Map<string, string>();
+  for (const path of [...new Bun.Glob("**/*.html").scanSync({ cwd: PAGES })].sort()) {
+    pages.set(path.slice(0, -".html".length), await Bun.file(join(PAGES, path)).text());
+  }
+  return pages;
 }
 
 async function assets(): Promise<Record<string, File>> {
@@ -152,7 +179,6 @@ async function readPosts(pages: Map<string, string>): Promise<Post[]> {
 
 /** The blog index, with one pages/_post-item.html per post in #posts. */
 async function listPosts(blog: string, item: string, posts: Post[]): Promise<string> {
-  if (!posts.length) return blog;
   const items = await Promise.all(
     posts.map((post) => {
       const fill = (apply: (element: HTMLRewriterTypes.Element) => void) => ({
@@ -170,7 +196,9 @@ async function listPosts(blog: string, item: string, posts: Post[]): Promise<str
       );
     }),
   );
-  return rewrite(blog, new HTMLRewriter().on("#posts", { element: (e) => void e.setInnerContent(`\n${items.join("")}`, { html: true }) }));
+  // Indented inside the list, since the result is also written to pages/blog.html.
+  const list = items.map((html) => html.replace(/^(?=.)/gm, "  ")).join("");
+  return rewrite(blog, new HTMLRewriter().on("#posts", { element: (e) => void e.setInnerContent(`\n${list}`, { html: true }) }));
 }
 
 /** The cards in pages/projects.html: each .tile's .tile-title, .tile-face link and .tile-panel text. */
