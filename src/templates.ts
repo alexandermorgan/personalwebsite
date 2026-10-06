@@ -7,7 +7,7 @@ import { escape, Html } from "./html";
 
 import layout from "../pages/layout.html" with { type: "text" };
 import main from "../pages/main.html" with { type: "text" };
-import about from "../pages/about.html" with { type: "text" };
+import home from "../pages/home.html" with { type: "text" };
 import projects from "../pages/projects.html" with { type: "text" };
 import publications from "../pages/publications.html" with { type: "text" };
 import recommendations from "../pages/recommendations.html" with { type: "text" };
@@ -28,7 +28,7 @@ import cvPending from "../pages/partials/cv-pending.html" with { type: "text" };
 const FILES = {
   layout,
   main,
-  about,
+  home,
   projects,
   publications,
   recommendations,
