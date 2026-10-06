@@ -46,11 +46,11 @@ description into `<head>` and the rest into `<main>`. See [`vendor/fixi/README.m
 `test/fixi.test.ts` checks that everything outside the marked block is deletions only.
 
 **Theme.** The switch and both color schemes are hypermediajobs.com's, with green (the wordmark) and brown
-(the current page in the navbar) as accents: dark by default
-(`<html data-theme="dark">`), sand in light mode. The switch stores the choice in `localStorage`; `site.js`, a
-tiny script loaded before the page renders, applies it before first paint. Switching sweeps the new theme
-across the page from the switch with a View Transition. The switch's look follows `data-theme`, so a saved
-light theme shows correctly from the first paint.
+(the current page in the navbar) as accents: sand in light mode, the default (`<html data-theme="light">`),
+and dark. Every change of the switch is stored in `localStorage`; `site.js`, a tiny script loaded before the
+page renders, applies it before first paint. Switching sweeps the new theme across the page from the switch
+with a View Transition. The switch's look follows `data-theme`, so a saved dark theme shows correctly from the
+first paint.
 
 **Cards.** `/projects`, `/publications` and `/recommendations` are lists of cards, written out in their page
 files. A card's face
@@ -82,7 +82,8 @@ description); `/sitemap.xml` has every page. Both are static files made by the b
 feed in `<head>` for autodiscovery and in the footer.
 
 **Links.** External links always open in a new tab (`target="_blank" rel="noopener"`); a test checks every
-page. The footer links to Twitter, GitHub, LinkedIn, Google Scholar and the RSS feed.
+page. The footer links to Twitter, GitHub, LinkedIn, Google Scholar and the RSS feed, as logos (inline SVG in
+`pages/_layout.html`, all in the footer's text color, with hidden text for screen readers).
 
 **Styling.** `styles/tokens.css` holds every shared value (both themes' colors, spacing, type, radii, sizes).
 Only the Basecoat components in use are vendored into `vendor/basecoat/`, as plain CSS on those tokens.

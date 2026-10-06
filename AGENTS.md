@@ -168,8 +168,9 @@ loosen it.
 - Everything is concatenated into one content-hashed `app.css`. No web fonts (system font stacks), and nothing
   that loads late or shifts the layout: every image and card has a fixed size.
 
-**Theme.** `<html data-theme="dark">` by default. `site.js` is loaded render-blocking in `<head>` (it's tiny
-and cached forever) so a saved theme applies before first paint. Style both themes through the tokens.
+**Theme.** `<html data-theme="light">` by default. `site.js` saves every change of the switch in
+`localStorage`, and is loaded render-blocking in `<head>` (it's tiny and cached forever) so a saved theme
+applies before first paint. Style both themes through the tokens.
 
 **Links.** External links always open in a new tab (`target="_blank" rel="noopener"`); a test checks every
 page. Internal links are plain `<a href>` and must resolve (also tested).

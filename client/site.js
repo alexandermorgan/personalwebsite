@@ -1,5 +1,6 @@
 // Loaded render-blocking in <head> (it is tiny and cached forever), so the saved
-// theme applies before first paint. It also runs in-page navigation: same-site
+// theme applies before first paint. The page is light by default; every change
+// of the switch is saved in localStorage. It also runs in-page navigation: same-site
 // link clicks and back/forward ask fixi (on <body>, see pages/_layout.html) to
 // fetch the new page and swap it into <main>, leaving the header and footer alone.
 // fixi itself puts the page's <title> and description into <head>.

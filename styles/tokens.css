@@ -54,7 +54,8 @@
 }
 
 /*
- * Theme colors. Dark is the default; <html data-theme="light"> switches.
+ * Theme colors, picked by <html data-theme>: light by default (see
+ * pages/_layout.html), or the reader's saved choice (client/site.js).
  * (Plain values per theme rather than light-dark(), so a theme change
  * transitions smoothly.)
  */
