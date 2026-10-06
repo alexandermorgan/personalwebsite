@@ -415,11 +415,14 @@ main:focus-visible {
   -webkit-line-clamp: var(--tile-title-lines);
   font-size: var(--text-base);
 }
+/* Always two lines tall, so every card's picture is the same size whether its
+   tagline takes one line or two. */
 .tile-tagline {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  min-height: 2lh;
   color: var(--muted-foreground);
 }
 
