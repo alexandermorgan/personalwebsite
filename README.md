@@ -11,7 +11,7 @@ One Cloudflare Worker serves everything, set up like [hypermediajobs.com](https:
 | [fixi.js](https://github.com/bigskysoftware/fixi) v0.9.4 (vendored, cut down) | In-page navigation: swapping each page into `<main>`, with its title and description. |
 | [Basecoat](https://basecoatui.com) (vendored components only) | The theme switch, buttons and cards, as plain CSS. |
 | Static Assets | Hashed CSS/JS (cached forever), favicon, robots.txt. |
-| R2 | The CV PDF, served at `/cv.pdf` through the worker. |
+| R2 | The CV PDF, linked from `/cv`. |
 
 There are no runtime dependencies. Dev dependencies: `wrangler` (preview and deploy), `typescript` (typecheck)
 and `@types/bun`.
@@ -24,7 +24,7 @@ clicks on same-site links load in place instead, so the header, navbar and foote
 
 - `<body fx-action="/" fx-trigger="site:navigate" fx-target="#main">` is the only fixi element.
   `client/site.js` decides whether a click is a plain same-site link (other sites, new-tab/modifier clicks,
-  `target`, `download`, files like `/cv.pdf`, in-page anchors and links marked `data-reload` are left to the
+  `target`, `download`, files like `/feed.xml`, in-page anchors and links marked `data-reload` are left to the
   browser), cancels the browser navigation and dispatches `site:navigate` on `<body>`. Back/forward does the
   same.
 - fixi fetches the page with its `FX-Request: true` header. The worker (`src/worker.ts`) then answers with
@@ -73,9 +73,8 @@ each), in the feed and in the sitemap. The list in `pages/blog.html` is kept up 
 git pre-commit hook (`.githooks/pre-commit`, installed by `bun install`) and `bun run dev`, whenever
 `pages/blog/` changes, rewrite it, so adding a post is only adding its file.
 
-**CV.** Set `CV_URL` in `wrangler.jsonc` to the PDF's URL (e.g. its public R2 URL), and the worker serves it
-at `/cv.pdf`. `/cv` (`pages/cv.html`) says the CV is coming soon; once it's uploaded, change the page to link
-to and embed `/cv.pdf`.
+**CV.** The PDF lives in a public R2 bucket, and `/cv` (`pages/cv.html`) links straight to it. To update the CV,
+upload the new PDF over the old one in R2.
 
 **RSS.** `/feed.xml` has every blog post, in full, and every project card on `/projects` (its title, link and
 description); `/sitemap.xml` has every page. Both are static files made by the build. Every page links to the
@@ -117,7 +116,7 @@ bun run preview    # builds and runs wrangler dev
 | Projects, publications, recommendations | `pages/projects.html`, `pages/publications.html`, `pages/recommendations.html` |
 | Blog posts | Add or edit `pages/blog/<slug>.html` |
 | A new page | Add `pages/<name>.html` (and a navbar link in `pages/_layout.html`) |
-| The CV | Upload the PDF to R2, set `CV_URL` in `wrangler.jsonc`, and update `pages/cv.html` |
+| The CV | Upload the new PDF to R2 in place of the old one (or change the link in `pages/cv.html`) |
 | Header, footer (and its links) | `pages/_layout.html` |
 
 ## Scripts
@@ -152,7 +151,7 @@ One-time setup, in the Cloudflare dashboard:
 2. Workers & Pages → Create → Import a repository → this repo. Production branch `main`, build command empty,
    deploy command `npx wrangler deploy` (it runs `bun scripts/build.ts` itself). From then on every push to
    `main` builds and deploys, like hypermediajobs.com.
-3. Upload the CV PDF to an R2 bucket with public access and put its URL in `CV_URL`.
+3. The CV PDF is in an R2 bucket with public access, linked from `pages/cv.html`.
 
 `wrangler.jsonc` routes `alexandermorgan.dev` and `www.alexandermorgan.dev` (redirected to the bare domain) to
 the worker as custom domains, so the domain must be on the account before the first deploy.

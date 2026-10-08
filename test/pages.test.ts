@@ -91,7 +91,7 @@ describe("links", () => {
       const body = await (await call(path)).text();
       for (const a of anchors(body)) {
         const url = new URL(attr(a, "href")!, ORIGIN);
-        if (url.origin !== ORIGIN || url.pathname === "/cv.pdf") continue;
+        if (url.origin !== ORIGIN) continue;
         expect({ a, target: attr(a, "target") }).toEqual({ a, target: null });
         const status = url.hash && url.pathname === "/" ? 200 : (await call(url.pathname)).status;
         expect({ path, href: url.pathname, status }).toEqual({ path, href: url.pathname, status: 200 });

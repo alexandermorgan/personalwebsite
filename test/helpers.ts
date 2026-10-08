@@ -11,14 +11,13 @@ export interface CallOptions {
   method?: string;
   /** Send FX-Request, as fixi does for in-page navigation. */
   fx?: boolean;
-  env?: Partial<Env>;
 }
 
 /** Send a request through the worker. */
 export function call(path: string, opts: CallOptions = {}): Promise<Response> {
   const headers = new Headers();
   if (opts.fx) headers.set("fx-request", "true");
-  return worker.fetch(new Request(ORIGIN + path, { method: opts.method ?? "GET", headers }), { ...ENV, ...opts.env });
+  return worker.fetch(new Request(ORIGIN + path, { method: opts.method ?? "GET", headers }), ENV);
 }
 
 /** Every page's URL, from the page files: /_pages/blog/x.html is /blog/x, index.html is /. */

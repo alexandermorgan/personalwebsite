@@ -8,8 +8,7 @@ export const CSP = [
   // Cards show each site's own og:image.
   "img-src 'self' data: https:",
   "connect-src 'self'",
-  // The CV page embeds /cv.pdf.
-  "frame-src 'self'",
+  "frame-src 'none'",
   "form-action 'self'",
   "frame-ancestors 'none'",
   "base-uri 'none'",

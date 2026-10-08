@@ -80,7 +80,7 @@ the full page agree on the title, description and content.
 
 `<body fx-action="/" fx-trigger="site:navigate" fx-target="#main">` in the layout is the only fixi element. A
 click on a same-site link goes through `site.link()` in `client/site.js`, which decides whether to load it in
-place (other sites, modifier clicks, `target`, `download`, files like `/cv.pdf` and anchors on the same page
+place (other sites, modifier clicks, `target`, `download`, files like `/feed.xml` and anchors on the same page
 are left to the browser) and then dispatches `site:navigate` on `<body>`. Back/forward does the same. On
 `fx:swapped`, `site.js` updates the URL (after any redirect), the navbar's `aria-current`, the scroll
 position and focus. A response that doesn't start with `<title>`, or a network error, falls back to a full
@@ -153,7 +153,7 @@ and scroll), about 160 lines. Reach for HTML and CSS first (a card's description
 `fx-*` attributes. Add to `site.js` only when neither will do, and keep the additions small. Don't add a
 second script or a build step for client code. The CSP in `src/http.ts` allows scripts and styles only from
 the site itself, so there are no inline `<script>` tags, inline styles or third-party scripts. Images may come
-from any `https:` origin (the cards show each site's own `og:image`), and only `/cv.pdf` is framed. Don't
+from any `https:` origin (the cards show each site's own `og:image`), and nothing is framed. Don't
 loosen it.
 
 **CSS.** Plain CSS, no preprocessor or Tailwind anywhere.
@@ -180,9 +180,9 @@ page. Internal links are plain `<a href>` and must resolve (also tested).
 (served `immutable`, see `public/_headers`) with the layout pointed at them. Only `src/` ships as code, and it
 holds no content. `test/build.test.ts` checks that no `dev/` or `test/` code ends up in the bundle.
 
-**Storage.** None. Content lives in the repo and ships with the worker. The CV PDF lives in R2 and the worker
-fetches it from its public URL (`CV_URL` in `wrangler.jsonc`) to serve it at `/cv.pdf`. Don't add D1, KV, R2
-bindings, Durable Objects or queues until there's a concrete need.
+**Storage.** None. Content lives in the repo and ships with the worker. Large files (the CV PDF, photos) live
+in a public R2 bucket and pages link to them directly. Don't add D1, KV, R2 bindings, Durable Objects or
+queues until there's a concrete need.
 
 **Code style.** Small modules with a header comment saying what each one is for, plain functions, and few
 abstractions. Prefer deleting code to adding options. Match the comment density and naming of the
@@ -205,7 +205,7 @@ surrounding code. Accessibility comes from the HTML: real `<a>`, `<button>`, `<l
 4. New values use tokens in `styles/tokens.css`.
 5. `bun run check` passes (typecheck + `bun:test`, under a second). Tests call the worker's `fetch` handler
    directly through `call()` in `test/helpers.ts`, with the site's static files as its `ASSETS` (`fx: true`
-   for in-place navigation, `env` for `CV_URL`). Page-wide tests run on every file in `pages/`, so a new page
-   is covered without listing it.
-6. To see it running: `bun run dev` → http://localhost:8787 (set `CV_URL` to try `/cv.pdf` with a real PDF),
+   for in-place navigation). Page-wide tests run on every file in `pages/`, so a new page is covered without
+   listing it.
+6. To see it running: `bun run dev` → http://localhost:8787,
    and `bun run preview` to run the production build on workerd.

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, spyOn, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { SITE } from "../scripts/site";
 import { CSP } from "../src/http";
 import worker from "../src/worker";
@@ -45,32 +45,5 @@ describe("worker", () => {
     const xml = await (await call("/sitemap.xml")).text();
     expect(xml.match(/<loc>/g)).toHaveLength(PAGES.length);
     for (const path of PAGES) expect(xml).toContain(`<loc>${SITE}${path}</loc>`);
-  });
-});
-
-describe("/cv.pdf", () => {
-  let fetchSpy: ReturnType<typeof spyOn> | undefined;
-  afterEach(() => fetchSpy?.mockRestore());
-
-  test("is missing until CV_URL is set", async () => {
-    expect((await call("/cv.pdf")).status).toBe(404);
-  });
-
-  test("streams the PDF from CV_URL, embeddable only by this site", async () => {
-    fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(new Response("%PDF-1.7", { headers: { "content-type": "binary/octet-stream" } }));
-    const res = await call("/cv.pdf", { env: { CV_URL: "https://example.r2.dev/cv.pdf" } });
-    expect(fetchSpy).toHaveBeenCalledWith("https://example.r2.dev/cv.pdf");
-    expect(res.status).toBe(200);
-    expect(res.headers.get("content-type")).toBe("application/pdf");
-    expect(res.headers.get("content-security-policy")).toBe("frame-ancestors 'self'");
-    expect(await res.text()).toBe("%PDF-1.7");
-  });
-
-  test("a failing upstream is a 502", async () => {
-    fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(new Response("no", { status: 404 }));
-    const errors = spyOn(console, "error").mockImplementation(() => {});
-    const res = await call("/cv.pdf", { env: { CV_URL: "https://example.r2.dev/cv.pdf" } });
-    errors.mockRestore();
-    expect(res.status).toBe(502);
   });
 });

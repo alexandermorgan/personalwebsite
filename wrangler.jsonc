@@ -28,10 +28,5 @@
     // Static files are served before the worker runs, except the page files,
     // which only the worker may read (it answers /_pages/* with a 404).
     "run_worker_first": ["/_pages/*"]
-  },
-  "vars": {
-    // The CV PDF's URL (e.g. a public R2 URL); the worker serves it at /cv.pdf.
-    // Empty: /cv says the CV is coming soon.
-    "CV_URL": ""
   }
 }

@@ -15,8 +15,6 @@ import { isNavigation, page, redirect, withSecurityHeaders } from "./http";
 /** The bindings and variables this worker uses (see wrangler.jsonc). */
 export interface Env {
   ASSETS: { fetch(input: Request | URL | string): Promise<Response> };
-  /** Where the CV PDF lives (e.g. a public R2 URL). Served at /cv.pdf. Empty until it's uploaded. */
-  CV_URL?: string;
 }
 
 export default {
@@ -36,7 +34,6 @@ export default {
         return withSecurityHeaders(new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD" } }));
       }
       if (path.split("/").some((segment) => segment.startsWith("_"))) return withSecurityHeaders(await notFound(request, env));
-      if (path === "/cv.pdf") return withSecurityHeaders(await cvPdf(request, env));
       const file = await readPage(env, url, path === "/" ? "index" : path.slice(1));
       if (file !== null) return withSecurityHeaders(await respond(request, env, file));
       // Any other static file (feed.xml, robots.txt, ...). On Cloudflare these are
@@ -139,23 +136,4 @@ async function assemble(env: Env, url: URL, file: string): Promise<string> {
 
 function rewrite(html: string, rewriter: HTMLRewriter): Promise<string> {
   return rewriter.transform(new Response(html)).text();
-}
-
-/** The CV PDF, fetched from CV_URL (in R2) so it's served from this site's own domain. */
-async function cvPdf(request: Request, env: Env): Promise<Response> {
-  if (!env.CV_URL) return notFound(request, env);
-  const upstream = await fetch(env.CV_URL);
-  if (!upstream.ok) {
-    console.error(`CV_URL answered ${upstream.status}`);
-    return new Response("The CV is unavailable right now.", { status: 502 });
-  }
-  return new Response(upstream.body, {
-    headers: {
-      "content-type": "application/pdf",
-      "content-disposition": 'inline; filename="Alexander-Morgan-CV.pdf"',
-      "cache-control": "public, max-age=3600",
-      // Only framing matters for a PDF (the CV page embeds it); a page CSP can break browsers' PDF viewers.
-      "content-security-policy": "frame-ancestors 'self'",
-    },
-  });
 }
