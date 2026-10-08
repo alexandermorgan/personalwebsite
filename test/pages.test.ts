@@ -30,6 +30,7 @@ describe("pages", () => {
       expect(attr(headTag(body, "meta", "name", "description"), "content")).toBeTruthy();
       expect(attr(headTag(body, "link", "rel", "canonical"), "href")).toBe(ORIGIN + path);
       expect(attr(headTag(body, "meta", "property", "og:type"), "content")).toBe(path.startsWith("/blog/") ? "article" : "website");
+      expect(attr(headTag(body, "meta", "property", "og:image"), "content")).toStartWith("https://");
     }
   });
 
