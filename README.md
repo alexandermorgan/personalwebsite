@@ -149,7 +149,7 @@ One-time setup, in the Cloudflare dashboard:
 
 1. Add `alexandermorgan.dev` to the Cloudflare account (buy or transfer it there).
 2. Workers & Pages → Create → Import a repository → this repo. Production branch `main`, build command empty,
-   deploy command `npx wrangler deploy` (it runs `bun scripts/build.ts` itself). From then on every push to
+   deploy command `bunx wrangler deploy` (it runs `bun scripts/build.ts` itself). From then on every push to
    `main` builds and deploys, like hypermediajobs.com.
 3. The CV PDF is in an R2 bucket with public access, linked from `pages/cv.html`.
 

@@ -11,12 +11,14 @@ export interface CallOptions {
   method?: string;
   /** Send FX-Request, as fixi does for in-page navigation. */
   fx?: boolean;
+  ifNoneMatch?: string;
 }
 
 /** Send a request through the worker. */
 export function call(path: string, opts: CallOptions = {}): Promise<Response> {
   const headers = new Headers();
   if (opts.fx) headers.set("fx-request", "true");
+  if (opts.ifNoneMatch) headers.set("if-none-match", opts.ifNoneMatch);
   return worker.fetch(new Request(ORIGIN + path, { method: opts.method ?? "GET", headers }), ENV);
 }
 

@@ -4,6 +4,8 @@
 //
 //   /_pages/...               the page files from pages/, read by the worker: the
 //                             layout points at the assets, the blog index lists the posts
+//   /_pages/_version.txt      a hash of the page files and the worker's code, which
+//                             the worker uses as the pages' ETag (see version())
 //   /assets/...               app.css (tokens, base styles, vendored Basecoat
 //                             components and site styles, in order), site.js, fixi.js
 //   /feed.xml, /sitemap.xml   made from pages/ (the feed has the posts and the project cards)
@@ -76,6 +78,7 @@ export async function site({ hashed = false } = {}): Promise<Map<string, File>> 
   pages.set("_layout", await pointAtAssets(pages.get("_layout")!, urls));
   pages.set("blog", await listPosts(pages.get("blog")!, pages.get("_post-item")!, posts));
   for (const [name, html] of pages) files.set(`/_pages/${name}.html`, { body: html, type: "text/html; charset=utf-8" });
+  files.set("/_pages/_version.txt", { body: await version(pages), type: "text/plain; charset=utf-8" });
 
   const paths = [...pages.keys()].filter((name) => !name.split("/").some((part) => part.startsWith("_")));
   files.set("/feed.xml", { body: await feed(posts, await readProjects(pages.get("projects")!)), type: "application/rss+xml; charset=utf-8" });
@@ -109,6 +112,20 @@ async function readPages(): Promise<Map<string, string>> {
     pages.set(path.slice(0, -".html".length), await Bun.file(join(PAGES, path)).text());
   }
   return pages;
+}
+
+/**
+ * What every page the worker sends is made from: the page files (the layout
+ * already names the hashed assets) and the worker's own code. Unchanged, the
+ * pages are too, so browsers can keep what they have.
+ */
+async function version(pages: Map<string, string>): Promise<string> {
+  const hasher = new Bun.CryptoHasher("sha256");
+  for (const [name, html] of pages) hasher.update(`${name}\0${html}\0`);
+  for (const path of [...new Bun.Glob("**/*.ts").scanSync({ cwd: join(ROOT, "src") })].sort()) {
+    hasher.update(`src/${path}\0${await Bun.file(join(ROOT, "src", path)).text()}\0`);
+  }
+  return hasher.digest("hex").slice(0, 16);
 }
 
 async function assets(): Promise<Record<string, File>> {

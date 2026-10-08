@@ -10,7 +10,7 @@
 // Names starting with _ are never URLs: _layout.html and _not-found.html are
 // only used by the worker itself.
 
-import { isNavigation, page, redirect, withSecurityHeaders } from "./http";
+import { etag, isFresh, isNavigation, notModified, page, redirect, withSecurityHeaders } from "./http";
 
 /** The bindings and variables this worker uses (see wrangler.jsonc). */
 export interface Env {
@@ -34,8 +34,12 @@ export default {
         return withSecurityHeaders(new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD" } }));
       }
       if (path.split("/").some((segment) => segment.startsWith("_"))) return withSecurityHeaders(await notFound(request, env));
+      // A page the browser got from this build is unchanged, so there's nothing to
+      // read or assemble. Only pages get these ETags, so it's one this URL had.
+      const tag = etag(request, await readVersion(env, url));
+      if (isFresh(request, tag)) return withSecurityHeaders(notModified(tag));
       const file = await readPage(env, url, path === "/" ? "index" : path.slice(1));
-      if (file !== null) return withSecurityHeaders(await respond(request, env, file));
+      if (file !== null) return withSecurityHeaders(await respond(request, env, file, 200, tag));
       // Any other static file (feed.xml, robots.txt, ...). On Cloudflare these are
       // served before the worker runs; under Bun (dev, tests) they come through here.
       const asset = await env.ASSETS.fetch(request);
@@ -63,13 +67,20 @@ async function readOwnPage(env: Env, url: URL, name: string): Promise<string> {
   return file;
 }
 
+/** The build's version, from /_pages/_version.txt (see scripts/site.ts). */
+async function readVersion(env: Env, url: URL): Promise<string> {
+  const response = await env.ASSETS.fetch(new URL("/_pages/_version.txt", url));
+  if (!response.ok) throw new Error("missing /_pages/_version.txt");
+  return (await response.text()).trim();
+}
+
 async function notFound(request: Request, env: Env): Promise<Response> {
   return respond(request, env, await readOwnPage(env, new URL(request.url), "_not-found"), 404);
 }
 
 /** The page file for in-page navigation, otherwise the whole document. The status is the real one either way. */
-async function respond(request: Request, env: Env, file: string, status = 200): Promise<Response> {
-  return page(isNavigation(request) ? file : await assemble(env, new URL(request.url), file), status);
+async function respond(request: Request, env: Env, file: string, status = 200, etag?: string): Promise<Response> {
+  return page(isNavigation(request) ? file : await assemble(env, new URL(request.url), file), status, etag);
 }
 
 /**

@@ -42,7 +42,7 @@ its content:
 
 ```html
 <title>Projects · Alexander Morgan</title>
-<meta name="description" content="Websites, games and libraries I've built or worked on.">
+<meta name="description" content="Websites, libraries, and games I've built or worked on.">
 <header class="page-header">
   <h1>Projects</h1>
   …
@@ -77,6 +77,10 @@ Each URL serves both a full document and an in-place update:
 Both have the page's real status (a missing page is `_not-found.html` with a 404 either way) and
 `Vary: FX-Request`, so a cache never serves one for the other. A test checks that the in-place response and
 the full page agree on the title, description and content.
+
+Pages are `no-cache` with an ETag: the build's version (`/_pages/_version.txt`, a hash of the page files
+and `src/`, made by `scripts/site.ts`) plus `-full` or `-fx`. A browser revalidating a page from the same
+build gets a 304 before the worker reads or assembles anything.
 
 `<body fx-action="/" fx-trigger="site:navigate" fx-target="#main">` in the layout is the only fixi element. A
 click on a same-site link goes through `site.link()` in `client/site.js`, which decides whether to load it in
