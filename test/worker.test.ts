@@ -29,8 +29,9 @@ describe("worker", () => {
     expect(CSP).not.toContain("unsafe");
   });
 
-  test("only GET and HEAD", async () => {
+  test("only GET and HEAD, apart from the contact form", async () => {
     expect((await call("/", { method: "POST" })).status).toBe(405);
+    expect((await call("/contact", { method: "PUT" })).headers.get("allow")).toBe("GET, HEAD, POST");
     const head = await call("/projects", { method: "HEAD" });
     expect(head.status).toBe(200);
   });

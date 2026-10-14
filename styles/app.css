@@ -347,6 +347,19 @@ main:focus-visible {
   color: var(--foreground);
 }
 
+/* The contact form: Basecoat fields stacked, the button at its natural width. */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.contact-form > .btn {
+  align-self: flex-start;
+}
+.contact-form .textarea {
+  min-height: var(--textarea-height);
+}
+
 /* Cards (projects, publications, recommendations)
  *
  * Every card is --tile-height tall: the face (art, title, tagline; or for a

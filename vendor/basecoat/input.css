@@ -1,0 +1,39 @@
+/* Basecoat: input, textarea (MIT, Ronan Berder). Ported from Tailwind to plain CSS. */
+.input,
+.textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  background-color: var(--input-background);
+  box-shadow: var(--input-shadow); /* this site: fields stand out from the page (tokens.css) */
+  font-size: var(--text-sm);
+  outline: none;
+  transition: color var(--transition), box-shadow var(--transition);
+}
+.input {
+  height: var(--control-height);
+  padding: var(--space-1) calc(var(--space-2) * 1.25);
+}
+.textarea {
+  display: block;
+  min-height: 4rem;
+  padding: var(--space-2) calc(var(--space-2) * 1.25);
+  resize: vertical;
+  field-sizing: content;
+}
+:is(.input, .textarea)::placeholder {
+  color: var(--muted-foreground);
+}
+:is(.input, .textarea):focus-visible {
+  border-color: var(--ring);
+  box-shadow: var(--focus-ring);
+}
+:is(.input, .textarea)[aria-invalid="true"] {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 20%, transparent);
+}
+:is(.input, .textarea):disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

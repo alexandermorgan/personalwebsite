@@ -9,12 +9,26 @@
 //
 // Names starting with _ are never URLs: _layout.html and _not-found.html are
 // only used by the worker itself.
+//
+// The one POST is the contact form's, to /contact (see contact.ts).
 
+import { fillForm, submit } from "./contact";
 import { etag, isFresh, isNavigation, notModified, page, redirect, withSecurityHeaders } from "./http";
 
 /** The bindings and variables this worker uses (see wrangler.jsonc). */
 export interface Env {
   ASSETS: { fetch(input: Request | URL | string): Promise<Response> };
+  /** Cloudflare Email Service, which forwards contact form messages. */
+  EMAIL: {
+    send(message: { to: string; from: { email: string; name: string }; replyTo: string; subject: string; text: string }): Promise<unknown>;
+  };
+  /** The sender address, on a domain onboarded to Cloudflare Email Service. */
+  EMAIL_FROM: string;
+  /** Where contact form messages go. */
+  CONTACT_EMAIL: string;
+  /** TypeSafe API key for Jev, which vets contact form messages. Without it, every message is forwarded. */
+  TYPESAFE_API_KEY?: string;
+  JEV_MODEL?: string;
 }
 
 export default {
@@ -30,8 +44,10 @@ export default {
     if (path.length > 1 && path.endsWith("/")) return withSecurityHeaders(redirect(path.replace(/\/+$/, "") + url.search));
     if (path === "/index") return withSecurityHeaders(redirect("/" + url.search));
     try {
+      if (request.method === "POST" && path === "/contact") return withSecurityHeaders(await contact(request, env, url));
       if (request.method !== "GET" && request.method !== "HEAD") {
-        return withSecurityHeaders(new Response("Method not allowed", { status: 405, headers: { allow: "GET, HEAD" } }));
+        const allow = path === "/contact" ? "GET, HEAD, POST" : "GET, HEAD";
+        return withSecurityHeaders(new Response("Method not allowed", { status: 405, headers: { allow } }));
       }
       if (path.split("/").some((segment) => segment.startsWith("_"))) return withSecurityHeaders(await notFound(request, env));
       // A page the browser got from this build is unchanged, so there's nothing to
@@ -51,6 +67,18 @@ export default {
     }
   },
 };
+
+/**
+ * A contact form submission: once it's handled, the confirmation page (a
+ * redirect, so a reload doesn't send it again); otherwise the form again, with
+ * what was sent and what was wrong.
+ */
+async function contact(request: Request, env: Env, url: URL): Promise<Response> {
+  const outcome = await submit(request, env);
+  if (outcome.sent) return redirect("/contact/sent", 303);
+  const form = await fillForm(await readOwnPage(env, url, "contact"), outcome.submission, outcome.problems);
+  return respond(request, env, form, outcome.status);
+}
 
 /** A page's file, or null if there's no such page. */
 async function readPage(env: Env, url: URL, name: string): Promise<string | null> {
@@ -129,8 +157,8 @@ async function assemble(env: Env, url: URL, file: string): Promise<string> {
     await readOwnPage(env, url, "_layout"),
     new HTMLRewriter()
       .on("title", { element: (element) => void element.setInnerContent(title ?? "", { html: true }) })
-      .on('meta[name="description"], meta[property="og:description"], meta[name="twitter:description"]', set("content", description ?? ""))
-      .on('meta[property="og:title"], meta[name="twitter:title"]', set("content", title ?? ""))
+      .on('meta[name="description"], meta[property="og:description"]', set("content", description ?? ""))
+      .on('meta[property="og:title"]', set("content", title ?? ""))
       .on('link[rel="canonical"]', set("href", canonical))
       .on('meta[property="og:url"]', set("content", canonical))
       .on('meta[property="og:type"]', set("content", path.startsWith("/blog/") ? "article" : "website"))

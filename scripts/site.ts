@@ -31,6 +31,9 @@ export const CSS_FILES = [
   "vendor/basecoat/button.css",
   "vendor/basecoat/card.css",
   "vendor/basecoat/switch.css",
+  "vendor/basecoat/field.css",
+  "vendor/basecoat/input.css",
+  "vendor/basecoat/alert.css",
   "styles/app.css",
 ];
 

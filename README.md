@@ -12,6 +12,8 @@ One Cloudflare Worker serves everything, set up like [hypermediajobs.com](https:
 | [Basecoat](https://basecoatui.com) (vendored components only) | The theme switch, buttons and cards, as plain CSS. |
 | Static Assets | Hashed CSS/JS (cached forever), favicon, robots.txt. |
 | R2 | The CV PDF, linked from `/cv`. |
+| [Jev](https://typesafe.ai) (TypeSafe AI) | Vetting contact form messages, over its REST API. |
+| Cloudflare Email Service | Forwarding contact form messages that pass. |
 
 There are no runtime dependencies. Dev dependencies: `wrangler` (preview and deploy), `typescript` (typecheck)
 and `@types/bun`.
@@ -73,6 +75,15 @@ each), in the feed and in the sitemap. The list in `pages/blog.html` is kept up 
 git pre-commit hook (`.githooks/pre-commit`, installed by `bun install`) and `bun run dev`, whenever
 `pages/blog/` changes, rewrite it, so adding a post is only adding its file.
 
+**Contact.** `/contact` is a plain form (full name, email, and a 25 to 2,000 character message) built from
+Basecoat's field, input and alert components. It posts to `/contact` without JavaScript. `src/contact.ts`
+checks the fields, then asks Jev "Is this message legitimate and something worth my time to read and respond
+to?" about the whole form and the sender's IP (`CF-Connecting-IP`). If Jev's probability is over 0.25, the
+submission is emailed to `CONTACT_EMAIL` with Reply-To set to the sender. If Jev is unreachable or not
+configured, it's forwarded anyway, marked unvetted. The sender is redirected to `/contact/sent` either way. An
+invalid form comes back filled in, with the problems shown. If the email can't be sent, it comes back with an error.
+Under `bun run dev` the email is printed instead of sent.
+
 **CV.** The PDF lives in a public R2 bucket, and `/cv` (`pages/cv.html`) links straight to it. To update the CV,
 upload the new PDF over the old one in R2.
 
@@ -118,6 +129,7 @@ bun run preview    # builds and runs wrangler dev
 | A new page | Add `pages/<name>.html` (and a navbar link in `pages/_layout.html`) |
 | The CV | Upload the new PDF to R2 in place of the old one (or change the link in `pages/cv.html`) |
 | Header, footer (and its links) | `pages/_layout.html` |
+| Where contact messages go, and the sender | `CONTACT_EMAIL` and `EMAIL_FROM` in `wrangler.jsonc` |
 
 ## Scripts
 
@@ -152,6 +164,8 @@ One-time setup, in the Cloudflare dashboard:
    deploy command `bunx wrangler deploy` (it runs `bun scripts/build.ts` itself). From then on every push to
    `main` builds and deploys, like hypermediajobs.com.
 3. The CV PDF is in an R2 bucket with public access, linked from `pages/cv.html`.
+4. Onboard `alexandermorgan.dev` to Cloudflare Email Service so `EMAIL_FROM` (`contact@alexandermorgan.dev`,
+   in `wrangler.jsonc`) can send, and set Jev's key: `bunx wrangler secret put TYPESAFE_API_KEY`.
 
 `wrangler.jsonc` routes `alexandermorgan.dev` and `www.alexandermorgan.dev` (redirected to the bare domain) to
 the worker as custom domains, so the domain must be on the account before the first deploy.
@@ -162,6 +176,7 @@ the worker as custom domains, so the domain must be on the account before the fi
 src/            the worker (the only code that ships)
   worker.ts     serves the page file for a URL, or the whole page assembled around it
   http.ts       security headers and response helpers
+  contact.ts    the contact form: checks, Jev, email
 pages/          the site's HTML and content: one file per URL, blog/ for posts, _*.html to put them together
 styles/         tokens, base and site CSS
 vendor/         the cut-down fixi.js and the Basecoat components in use

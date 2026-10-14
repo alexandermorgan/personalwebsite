@@ -1,0 +1,24 @@
+/* Basecoat: alert (MIT, Ronan Berder). Ported from Tailwind to plain CSS. */
+.alert {
+  position: relative;
+  display: grid;
+  gap: 0.125rem;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background-color: var(--card);
+  color: var(--card-foreground);
+  font-size: var(--text-sm);
+}
+.alert > :is(h2, h3, strong) {
+  font-weight: var(--weight-medium);
+}
+.alert > section {
+  color: var(--muted-foreground);
+  text-wrap: pretty;
+}
+.alert[data-variant="destructive"],
+.alert[data-variant="destructive"] > section {
+  color: var(--destructive);
+}

@@ -49,6 +49,7 @@
   --header-height: 3.5rem;
   --control-height: 2.25rem;
   --control-height-sm: 2rem;
+  --textarea-height: 12rem;
 
   /* Motion */
   --transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);

@@ -19,6 +19,14 @@
   ],
   "workers_dev": false,
   "observability": { "enabled": true },
+  // Contact form messages are emailed through Cloudflare Email Service; the
+  // domain must be onboarded to it so EMAIL_FROM can send.
+  "send_email": [{ "name": "EMAIL" }],
+  "vars": {
+    "EMAIL_FROM": "contact@alexandermorgan.dev",
+    "CONTACT_EMAIL": "alexanderpmorgan@gmail.com"
+  },
+  // Secrets (wrangler secret put): TYPESAFE_API_KEY, for Jev.
   "assets": {
     "directory": "dist/public",
     "binding": "ASSETS",

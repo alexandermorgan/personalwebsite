@@ -1,0 +1,29 @@
+<title>Contact · Alexander Morgan</title>
+<meta name="description" content="Send Alexander Morgan a message.">
+<header class="page-header">
+  <h1>Contact</h1>
+  <p class="lede">Send me a message and I'll reply by email.</p>
+</header>
+<form class="contact-form narrow" method="post" action="/contact">
+  <div class="alert" data-variant="destructive" role="alert" data-error="send" hidden>
+    <strong>Your message wasn't sent</strong>
+    <section>Something went wrong on my end. Please try again in a few minutes.</section>
+  </div>
+  <div class="field">
+    <label for="name">Full name</label>
+    <input class="input" id="name" name="name" required maxlength="200" autocomplete="name">
+    <p class="field-error" id="name-error" data-error="name" hidden>Please enter your name (up to 200 characters).</p>
+  </div>
+  <div class="field">
+    <label for="email">Email</label>
+    <input class="input" id="email" name="email" type="email" required maxlength="254" autocomplete="email">
+    <p class="field-error" id="email-error" data-error="email" hidden>Please enter a valid email address.</p>
+  </div>
+  <div class="field">
+    <label for="message">Message</label>
+    <textarea class="textarea" id="message" name="message" required minlength="25" maxlength="2000"></textarea>
+    <p>25 to 2,000 characters.</p>
+    <p class="field-error" id="message-error" data-error="message" hidden>Your message must be 25 to 2,000 characters long.</p>
+  </div>
+  <button class="btn" type="submit">Send message</button>
+</form>

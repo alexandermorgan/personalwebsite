@@ -9,7 +9,10 @@ vendored here, ported from Tailwind `@apply` rules to plain CSS on the variables
 | `switch.css` | The theme switch in the header. |
 | `button.css` | The CV page's buttons and the not-found page. |
 | `card.css` | The base look of the project, publication and recommendation cards, and the blog list. |
+| `field.css` | The contact form's labelled fields and their error messages. |
+| `input.css` | The contact form's inputs and textarea. |
+| `alert.css` | The contact form's error when a message can't be sent. |
 
 Markup and class/attribute conventions match Basecoat's docs (`.btn[data-variant]`, `.card`,
-`input.switch[role=switch]`). To add a component, port its rules from
+`input.switch[role=switch]`, `.field`, `.input`/`.textarea`, `.alert[data-variant]`). To add a component, port its rules from
 `basecoat-css/dist/components/<name>.css`, then add the file to `CSS_FILES` in `scripts/site.ts`.

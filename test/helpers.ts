@@ -5,21 +5,36 @@ export const ORIGIN = "https://alexandermorgan.test";
 
 /** The static files, as the build makes them, and the worker's bindings serving them. */
 export const FILES = await site();
-export const ENV: Env = { ASSETS: assetsBinding(async () => FILES) };
+export const ENV: Env = {
+  ASSETS: assetsBinding(async () => FILES),
+  EMAIL: { send: async (message) => void SENT.push(message) },
+  EMAIL_FROM: "contact@alexandermorgan.test",
+  CONTACT_EMAIL: "me@alexandermorgan.test",
+};
+
+/** The emails ENV has sent. */
+export const SENT: Parameters<Env["EMAIL"]["send"]>[0][] = [];
 
 export interface CallOptions {
   method?: string;
   /** Send FX-Request, as fixi does for in-page navigation. */
   fx?: boolean;
   ifNoneMatch?: string;
+  /** Post these fields as a form. */
+  form?: Record<string, string>;
+  headers?: Record<string, string>;
+  /** Bindings to use instead of ENV's. */
+  env?: Partial<Env>;
 }
 
 /** Send a request through the worker. */
 export function call(path: string, opts: CallOptions = {}): Promise<Response> {
-  const headers = new Headers();
+  const headers = new Headers(opts.headers);
   if (opts.fx) headers.set("fx-request", "true");
   if (opts.ifNoneMatch) headers.set("if-none-match", opts.ifNoneMatch);
-  return worker.fetch(new Request(ORIGIN + path, { method: opts.method ?? "GET", headers }), ENV);
+  const body = opts.form && new URLSearchParams(opts.form);
+  const method = opts.method ?? (body ? "POST" : "GET");
+  return worker.fetch(new Request(ORIGIN + path, { method, headers, body }), { ...ENV, ...opts.env });
 }
 
 /** Every page's URL, from the page files: /_pages/blog/x.html is /blog/x, index.html is /. */
