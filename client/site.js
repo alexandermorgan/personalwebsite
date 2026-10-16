@@ -14,6 +14,20 @@
     // storage unavailable: keep the server default
   }
 
+  // Card images stay hidden until they have loaded (see .tile-image in styles/app.css),
+  // so a slow or failed one leaves the card's cover showing instead of a broken-image
+  // icon. Load events don't bubble, so they're caught on the way down; this script
+  // runs before any <img> exists, and fixi only puts a page's images in the document
+  // (where they start loading) when it swaps the page in.
+  root.classList.add("js");
+  document.addEventListener(
+    "load",
+    (evt) => {
+      if (evt.target instanceof HTMLImageElement) evt.target.classList.add("loaded");
+    },
+    true,
+  );
+
   const here = () => location.pathname + location.search;
   // The page whose content is in <main>, so back/forward between #anchors on it doesn't reload it.
   let shown = here();

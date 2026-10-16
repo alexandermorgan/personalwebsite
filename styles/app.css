@@ -449,6 +449,10 @@ main:focus-visible {
   height: 100%;
   object-fit: contain;
 }
+/* Shown only once loaded (client/site.js marks it), so a failed image shows nothing. */
+.js .tile-image:not(.loaded) {
+  visibility: hidden;
+}
 /* A site's icon rather than a share image (it has none): smaller, centered on the
    card's color, with no lettering behind it. */
 .tile-icon {
