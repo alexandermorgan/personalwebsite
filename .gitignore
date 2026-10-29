@@ -116,3 +116,6 @@ dist
 .dev/
 .wrangler/
 .dev.vars
+
+# macOS folder metadata
+.DS_Store
