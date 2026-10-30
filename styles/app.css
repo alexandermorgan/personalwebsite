@@ -365,11 +365,13 @@ main:focus-visible {
  * Every card is --tile-height tall: the face (art, title, tagline; or for a
  * publication its title, venue and date) links to the project, and the tab row
  * along the bottom has a Link tab (the same link) and a Description tab, the
- * <summary> of a <details>. Opening it makes the card exactly twice as tall, and
- * the description fills the new half, scrolling if it's longer. The open card
- * lies over whatever is below it rather than pushing it down: a negative bottom
- * margin cancels the extra height, so its grid row keeps its size. Fixed heights
- * (images are fitted inside them) mean nothing shifts as the page loads.
+ * <summary> of a <details>. Opening it grows the card downward to fit the
+ * description, up to twice the card's height, after which the description
+ * scrolls. Grid rows are a fixed --tile-height, so the open card lies over
+ * whatever is below it rather than pushing it down. The <details> share a name,
+ * so only one is open at a time, and client/site.js closes it on a click
+ * elsewhere. Fixed heights (images are fitted inside them) mean nothing shifts as
+ * the page loads.
  */
 .tiles {
   --tile-height: 20rem;
@@ -379,6 +381,7 @@ main:focus-visible {
   --tile-title-lines: 2;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(var(--tile-min-width), 100%), 1fr));
+  grid-auto-rows: var(--tile-height);
   align-items: start;
   gap: var(--space-6);
   padding: 0;
@@ -395,7 +398,7 @@ main:focus-visible {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: calc(var(--tile-height) - var(--tile-tab-height) - 2 * var(--tile-border)) var(--tile-tab-height);
+  grid-template-rows: calc(var(--tile-height) - var(--tile-tab-height) - 2 * var(--tile-border)) auto;
   gap: 0;
   height: var(--tile-height);
   padding: 0;
@@ -404,8 +407,7 @@ main:focus-visible {
 }
 .card.tile:has(> .tile-details[open]) {
   z-index: 1;
-  height: calc(2 * var(--tile-height));
-  margin-bottom: calc(-1 * var(--tile-height));
+  height: auto;
   border-color: var(--tone);
   box-shadow: 0 12px 32px -8px oklch(0 0 0 / 0.45);
 }
@@ -557,26 +559,16 @@ main:focus-visible {
   rotate: 225deg;
   translate: 0 0.15em;
 }
-/* The description fills the card's second half, the space below the tabs. */
+/* The description sits below the tabs, across the card's full width (its
+   negative margin reaches back over the Link tab's column). */
 .tile-panel {
-  position: absolute;
-  inset: calc(var(--tile-height) - 2 * var(--tile-border)) 0 0 0;
+  max-height: var(--tile-height);
+  margin-inline-start: -100%;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--space-4);
   border-top: 1px solid var(--border);
   line-height: var(--leading-relaxed);
-}
-/* Text scrolling out of the panel fades rather than being cut mid-line. */
-.tile-panel::after {
-  content: "";
-  position: sticky;
-  bottom: calc(-1 * var(--space-4));
-  display: block;
-  height: var(--space-6);
-  margin-top: calc(-1 * var(--space-6));
-  background-image: linear-gradient(transparent, var(--card));
-  pointer-events: none;
 }
 .tile-panel:focus-visible {
   outline-offset: -3px;
@@ -611,6 +603,9 @@ main:focus-visible {
 }
 .tone-slate {
   --tone: oklch(0.5 0.03 260);
+}
+.tone-silver {
+  --tone: oklch(0.74 0.01 260);
 }
 
 /* Blog */

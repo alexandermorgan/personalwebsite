@@ -28,6 +28,13 @@
     true,
   );
 
+  // A card's open description closes on a click anywhere outside it. (Only one
+  // is ever open: the <details> share a name.)
+  document.addEventListener("click", (evt) => {
+    const open = document.querySelector(".tile-details[open]");
+    if (open && !(evt.target instanceof Node && open.contains(evt.target))) open.open = false;
+  });
+
   const here = () => location.pathname + location.search;
   // The page whose content is in <main>, so back/forward between #anchors on it doesn't reload it.
   let shown = here();
